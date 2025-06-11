@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: StackStorm-Exchange/ci/.github/actions/checkout@master
         with:
-          st2-branch: master
+          st2-branch: v3.8
           lint-configs-branch: master
       - name: Install APT dependencies
         uses: StackStorm-Exchange/ci/.github/actions/apt-dependencies@master
