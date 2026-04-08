@@ -1,0 +1,46 @@
+version: 1.0
+
+description: Build Scout load config from samples
+
+input:
+  - sample_ids
+  - pipeline
+
+
+vars:
+  - samples: []
+
+output:
+  - load_config_path: <% ctx(load_config_path) %>
+
+tasks:
+  get_samples:
+    action: igene.get_sample
+    with-items: sample_id in <% ctx(sample_ids) %>
+    input:
+      sample_id: <% ctx(sample_id) %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - sample: <% ctx(samples) + [result().body] %>
+        do:
+          - generate_load_config
+
+  generate_load_config:
+    action: scout.generate_load_config
+    input:
+      samples: <% ctx(sample) %>
+      pipeline: <% ctx(pipeline) %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - load_config_path: <% result().config_path %>
+        do:
+          - load_case
+
+  load_case:
+    action: gmc_norr_scout.load_case
+    input:
+      hosts: <% ctx(scout_host) %>
+      load_config: <% ctx(load_config_path) %>
+      container_name: <% ctx(container_name) %>

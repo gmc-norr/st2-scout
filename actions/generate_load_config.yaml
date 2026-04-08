@@ -1,0 +1,42 @@
+name: generate_load_config
+runner_type: python-script
+description: Generate Scout load config YAML 
+enabled: true
+entry_point: generate_load_config.py
+
+
+parameters:
+  samples:
+    type: array
+    required: true
+
+  pipeline_dir:
+    type: string
+    required: true
+
+  pipeline:
+    type: string
+    required: true
+    enum:
+      - raredisease
+      - gms-solid
+
+  panels:
+    type: array
+    required: false
+    default: []
+
+  default_panels:
+    type: array
+    required: false
+    default: []
+
+output_schema:
+  type: object
+  properties:
+    config_path:
+      type: string
+    case_id:
+      type: string
+    generated:
+      type: boolean

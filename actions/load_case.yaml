@@ -1,0 +1,23 @@
+---
+name: load_case
+description: "Load a case into Scout from a load-config inside the Scout container"
+runner_type: remote-shell-script
+entry_point: load_case.sh
+enabled: true
+
+parameters:
+  hosts:
+    type: string
+    description: "Remote host running the Scout Docker container"
+    required: true
+
+  load_config:
+    type: string
+    description: "Path to load-config.yaml on the remote host"
+    required: true
+
+  container_name:
+    type: string
+    description: "Docker container name running Scout"
+    required: false
+    default: scout
