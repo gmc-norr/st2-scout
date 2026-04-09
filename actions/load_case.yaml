@@ -15,9 +15,11 @@ parameters:
     type: string
     description: "Path to load-config.yaml on the remote host"
     required: true
+    position: 0
 
   container_name:
     type: string
     description: "Docker container name running Scout"
     required: false
     default: scout
+    position: 1

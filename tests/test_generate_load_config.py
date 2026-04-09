@@ -1,4 +1,3 @@
-
 import sys
 from pathlib import Path
 import pytest
@@ -6,7 +5,13 @@ import pytest
 PACK_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PACK_ROOT))
 
-from actions.generate_load_config import GenerateLoadConfigAction, PIPELINE_CASE_FILES, PIPELINE_SAMPLE_FILES, PIPELINE_OUTPUT_DIR
+from actions.generate_load_config import (
+    GenerateLoadConfigAction,
+    PIPELINE_CASE_FILES,
+    PIPELINE_SAMPLE_FILES,
+    PIPELINE_OUTPUT_DIR,
+)
+
 
 def touch(path: Path):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -45,9 +50,7 @@ def pipeline_dir(tmp_path):
     pipeline_mock_dir.mkdir(parents=True, exist_ok=True)
 
     # samplesheet.csv
-    (pipeline_mock_dir / "samplesheet.csv").write_text(
-        "case_id\nFAM001\n"
-    )
+    (pipeline_mock_dir / "samplesheet.csv").write_text("case_id\nFAM001\n")
 
     # mock pipeline outputs
     mock_case_files(pipeline_mock_dir, case_id)
@@ -80,4 +83,3 @@ def test_generate_load_config_basic(pipeline_dir):
     assert success is True
     assert result["generated"] is True
     assert Path(result["config_path"]).exists()
-

@@ -7,17 +7,17 @@ from datetime import datetime
 from typing import Optional
 
 import logging
-log = logging.getLogger(__name__)
 
+log = logging.getLogger(__name__)
 
 
 try:
     from st2common.runners.base_action import Action
 except ImportError:
+
     class Action:
         def __init__(self, config=None):
             self.config = config
-
 
 
 PIPELINE_OUTPUT_DIR = "raredisease_results"
@@ -58,17 +58,19 @@ PIPLELINE_CANCER = "gms-solid"
 OWNERS = {
     PIPELINE_RD: "clingen-rd",
     PIPLELINE_CANCER: "clingen-cancer",
-    }
+}
 
 GENOME = {
     PIPELINE_RD: "38",
     PIPLELINE_CANCER: "37",
-    }
+}
+
 
 class PipelineNameException(Exception):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
 
 class ParentIDsException(Exception):
     def __init__(self, message):
@@ -77,26 +79,35 @@ class ParentIDsException(Exception):
 
 
 class GenerateLoadConfigAction(Action):
-    """ Action for creating load configs for scout """
-    def run(self, samples: list, pipeline_dir: str, pipeline: str, panels: list = [], default_panels: list = []):
+    """Action for creating load configs for scout"""
+
+    def run(
+        self,
+        samples: list,
+        pipeline_dir: str,
+        pipeline: str,
+        panels: list = [],
+        default_panels: list = [],
+    ):
         self.pipeline = pipeline
         self.pipeline_dir = Path(pipeline_dir)
         try:
             case_id = self._get_case_id(self.pipeline_dir)
             case_name = None
-            parent_ids = [sample.get("ParentSampleID", "").replace("/", "-").replace(" ", "_") for sample in samples]
+            parent_ids = [
+                sample.get("ParentSampleID", "").replace("/", "-").replace(" ", "_")
+                for sample in samples
+            ]
 
-            
             owner = OWNERS[self.pipeline]
             genome = GENOME[self.pipeline]
 
-
             if len(set(parent_ids)) != 1:
                 raise ParentIDsException("More than one parent ID for samples")
-            
+
             if parent_ids[0] != "":
                 case_name = parent_ids[0]
-        
+
             scout_panels = []
             for sample in samples:
                 for p in sample.get("Panels", []):
@@ -109,7 +120,9 @@ class GenerateLoadConfigAction(Action):
             all_panels = list(set(panels + all_default_panels + ["PANELAPP-GREEN"]))
 
             if self.pipeline not in (PIPELINE_RD, PIPLELINE_CANCER):
-                raise PipelineNameException(f"{self.pipeline} is not a defined pipeline") 
+                raise PipelineNameException(
+                    f"{self.pipeline} is not a defined pipeline"
+                )
 
             if self.pipeline == PIPELINE_RD:
                 analysis_date = self._get_analysis_date(Path(self.pipeline_dir))
@@ -121,38 +134,54 @@ class GenerateLoadConfigAction(Action):
                     "rank_model_version": "0.1",
                     "owner": owner,
                     "samples": self._build_sample_entries(samples),
-                    "vcf_snv": self._case_file(self.pipeline_dir, "clinical_snv", case_id),
-                    "vcf_ranked": self._case_file(self.pipeline_dir, "research_snv", case_id),
-                    "peddy_ped": self._case_file(self.pipeline_dir, "peddy_ped", case_id),
-                    "peddy_sex": self._case_file(self.pipeline_dir, "peddy_sex", case_id),
-                    "peddy_check": self._case_file(self.pipeline_dir, "peddy_check", case_id),
+                    "vcf_snv": self._case_file(
+                        self.pipeline_dir, "clinical_snv", case_id
+                    ),
+                    "vcf_ranked": self._case_file(
+                        self.pipeline_dir, "research_snv", case_id
+                    ),
+                    "peddy_ped": self._case_file(
+                        self.pipeline_dir, "peddy_ped", case_id
+                    ),
+                    "peddy_sex": self._case_file(
+                        self.pipeline_dir, "peddy_sex", case_id
+                    ),
+                    "peddy_check": self._case_file(
+                        self.pipeline_dir, "peddy_check", case_id
+                    ),
                     "multiqc": self._case_file(self.pipeline_dir, "multiqc", case_id),
                     "smn_tsv": self._case_file(self.pipeline_dir, "smn_tsv", case_id),
                 }
-            
+
                 if len(all_panels) > 0:
                     config["gene_panels"] = all_panels
                 if len(all_default_panels) > 0:
                     config["default_panels"] = all_default_panels
 
             elif self.pipeline == PIPLELINE_CANCER:
-                #TODO WHEN GMS560 IS IN PRODUCTION
+                # TODO WHEN GMS560 IS IN PRODUCTION
                 config = {}
 
             output_path = self._write_yaml(config, self.pipeline_dir)
-            return (True, {
-                "generated": True,
-                "case_id": case_id,
-                "config_path": output_path,
-                "panels": all_panels,
-            })
+            return (
+                True,
+                {
+                    "generated": True,
+                    "case_id": case_id,
+                    "config_path": output_path,
+                    "panels": all_panels,
+                },
+            )
 
         except Exception as e:
-            return (False, {
-                "generated": False,
-                "error": str(e),
-            })
-        
+            return (
+                False,
+                {
+                    "generated": False,
+                    "error": str(e),
+                },
+            )
+
     def _scout_panel_from_igene_panel(self, igene_panel):
         pat = re.compile(r"^(.+)_(PAN|SP)_WGS_v\.?\d+\.\d+$")
         m = pat.match(igene_panel)
@@ -196,9 +225,7 @@ class GenerateLoadConfigAction(Action):
 
         for sample in samples:
             sample_name = (
-                sample.get("sample_id")
-                or sample.get("name")
-                or sample.get("sample")
+                sample.get("sample_id") or sample.get("name") or sample.get("sample")
             )
 
             if not sample_name:
@@ -210,31 +237,47 @@ class GenerateLoadConfigAction(Action):
                 "d4_file": self._sample_file(self.pipeline_dir, "d4", sample_name),
                 "sex": sample.get("sex"),
                 "phenotype": sample.get("phenotype"),
-                "chromograph_autozygous": self._sample_file(self.pipeline_dir, "chromograph_autozygous", sample_name),
-                "chromograph_coverage": self._sample_file(self.pipeline_dir, "chromograph_coverage", sample_name),
+                "chromograph_autozygous": self._sample_file(
+                    self.pipeline_dir, "chromograph_autozygous", sample_name
+                ),
+                "chromograph_coverage": self._sample_file(
+                    self.pipeline_dir, "chromograph_coverage", sample_name
+                ),
             }
             sample_entries.append(entry)
 
         return sample_entries
-    
-    def _case_file(self, dir: Path, filetype: str, case_id: str | None) -> Optional[str]:
+
+    def _case_file(
+        self, dir: Path, filetype: str, case_id: str | None
+    ) -> Optional[str]:
         if filetype not in PIPELINE_CASE_FILES:
             raise KeyError("invalid case file type: {filetype}")
-        p = dir / PIPELINE_OUTPUT_DIR / PIPELINE_CASE_FILES[filetype].format(case=case_id)
+        p = (
+            dir
+            / PIPELINE_OUTPUT_DIR
+            / PIPELINE_CASE_FILES[filetype].format(case=case_id)
+        )
         log.debug(f"asset case={case_id} asset={filetype} path={p} exists={p.exists()}")
         if not p.exists():
             return None
         return str(p)
-    
+
     def _sample_file(self, dir: Path, filetype: str, sample: str) -> Optional[str]:
         if filetype not in PIPELINE_SAMPLE_FILES:
             raise KeyError("invalid sample file type: {filetype}")
-        p = dir / PIPELINE_OUTPUT_DIR / PIPELINE_SAMPLE_FILES[filetype]["path"].format(sample=sample)
-        log.debug(f"asset sample={sample} asset={filetype} path={p} exists={p.exists()}")
+        p = (
+            dir
+            / PIPELINE_OUTPUT_DIR
+            / PIPELINE_SAMPLE_FILES[filetype]["path"].format(sample=sample)
+        )
+        log.debug(
+            f"asset sample={sample} asset={filetype} path={p} exists={p.exists()}"
+        )
         if not PIPELINE_SAMPLE_FILES[filetype]["is_prefix"] and not p.exists():
             return None
         return str(p)
-    
+
     def _get_analysis_date(self, dir: Path):
         multiqc = self._case_file(dir, "multiqc", None)
         if multiqc is None:
@@ -243,7 +286,6 @@ class GenerateLoadConfigAction(Action):
         analysis_date = datetime.fromtimestamp(info.st_mtime)
         log.debug(f"analysis date: {analysis_date}")
         return analysis_date
-
 
     def _write_yaml(self, config, output_dir):
         outdir = Path(output_dir)

@@ -5,7 +5,7 @@ description: Build Scout load config from samples
 input:
   - sample_ids
   - pipeline
-
+  - pipeline_dir
 
 vars:
   - samples: []
@@ -15,21 +15,22 @@ output:
 
 tasks:
   get_samples:
+    with: sample_id in <% ctx(sample_ids) %>
     action: igene.get_sample
-    with-items: sample_id in <% ctx(sample_ids) %>
     input:
-      sample_id: <% ctx(sample_id) %>
+      sample_id: <% item(sample_id) %>
     next:
       - when: <% succeeded() %>
         publish:
-          - sample: <% ctx(samples) + [result().body] %>
+          - samples: <% result().select($.body) %>
         do:
           - generate_load_config
 
   generate_load_config:
     action: scout.generate_load_config
     input:
-      samples: <% ctx(sample) %>
+      samples: <% ctx(samples) %>
+      pipeline_dir: <% ctx(pipeline_dir) %>
       pipeline: <% ctx(pipeline) %>
     next:
       - when: <% succeeded() %>
