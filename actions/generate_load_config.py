@@ -1,8 +1,6 @@
 from pathlib import Path
-import yaml
 import os
 import re
-import csv
 from datetime import datetime
 from typing import Optional
 
@@ -20,8 +18,6 @@ except ImportError:
             self.config = config
 
 
-PIPELINE_OUTPUT_DIR = "raredisease_results"
-
 PIPELINE_CASE_FILES = {
     "clinical_snv": "rank_and_filter/{case}_snv_ranked_clinical.vcf.gz",
     "research_snv": "rank_and_filter/{case}_snv_ranked_research.vcf.gz",
@@ -31,6 +27,7 @@ PIPELINE_CASE_FILES = {
     "multiqc": "multiqc/multiqc_report.html",
     "smn_tsv": "smncopynumbercaller/out/{case}_smncopynumbercaller.tsv",
 }
+
 
 PIPELINE_SAMPLE_FILES = {
     "d4": {
@@ -52,30 +49,18 @@ PIPELINE_SAMPLE_FILES = {
 }
 
 
-PIPELINE_RD = "raredisease"
-PIPLELINE_CANCER = "gms-solid"
+PIPELINE_RD = "nf-core-raredisease"
+PIPELINE_CANCER = "gms-solid"
 
 OWNERS = {
     PIPELINE_RD: "clingen-rd",
-    PIPLELINE_CANCER: "clingen-cancer",
+    PIPELINE_CANCER: "clingen-cancer",
 }
 
 GENOME = {
     PIPELINE_RD: "38",
-    PIPLELINE_CANCER: "37",
+    PIPELINE_CANCER: "37",
 }
-
-
-class PipelineNameException(Exception):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
-
-
-class ParentIDsException(Exception):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
 
 
 class GenerateLoadConfigAction(Action):
@@ -83,106 +68,45 @@ class GenerateLoadConfigAction(Action):
 
     def run(
         self,
-        samples: list,
-        pipeline_dir: str,
+        sample_ids: list,
+        case_id: str,
+        case_name: str,
+        sample_files: dict,
+        case_files: list,
         pipeline: str,
-        panels: list = [],
-        default_panels: list = [],
+        igene_panels: list,
     ):
-        self.pipeline = pipeline
-        self.pipeline_dir = Path(pipeline_dir)
+
         try:
-            case_id = self._get_case_id(self.pipeline_dir)
-            case_name = None
-            parent_ids = [
-                sample.get("ParentSampleID", "").replace("/", "-").replace(" ", "_")
-                for sample in samples
-            ]
-
-            owner = OWNERS[self.pipeline]
-            genome = GENOME[self.pipeline]
-
-            if len(set(parent_ids)) != 1:
-                raise ParentIDsException("More than one parent ID for samples")
-
-            if parent_ids[0] != "":
-                case_name = parent_ids[0]
-
-            scout_panels = []
-            for sample in samples:
-                for p in sample.get("Panels", []):
-                    if p == "SNV_WGS":
-                        continue
-                    scout_panels.append(self._scout_panel_from_igene_panel(p))
-                    log.info(f"using scout panel {scout_panels[-1]} (iGene panel {p})")
-
-            all_default_panels = list(set(default_panels + scout_panels))
-            all_panels = list(set(panels + all_default_panels + ["PANELAPP-GREEN"]))
-
-            if self.pipeline not in (PIPELINE_RD, PIPLELINE_CANCER):
-                raise PipelineNameException(
-                    f"{self.pipeline} is not a defined pipeline"
-                )
-
-            if self.pipeline == PIPELINE_RD:
-                analysis_date = self._get_analysis_date(Path(self.pipeline_dir))
-                config = {
-                    "family": case_id,
-                    "family_name": case_name if case_name is not None else case_id,
-                    "analysis_date": analysis_date,
-                    "human_genome_build": genome,
-                    "rank_model_version": "0.1",
-                    "owner": owner,
-                    "samples": self._build_sample_entries(samples),
-                    "vcf_snv": self._case_file(
-                        self.pipeline_dir, "clinical_snv", case_id
-                    ),
-                    "vcf_ranked": self._case_file(
-                        self.pipeline_dir, "research_snv", case_id
-                    ),
-                    "peddy_ped": self._case_file(
-                        self.pipeline_dir, "peddy_ped", case_id
-                    ),
-                    "peddy_sex": self._case_file(
-                        self.pipeline_dir, "peddy_sex", case_id
-                    ),
-                    "peddy_check": self._case_file(
-                        self.pipeline_dir, "peddy_check", case_id
-                    ),
-                    "multiqc": self._case_file(self.pipeline_dir, "multiqc", case_id),
-                    "smn_tsv": self._case_file(self.pipeline_dir, "smn_tsv", case_id),
-                }
-
-                if len(all_panels) > 0:
-                    config["gene_panels"] = all_panels
-                if len(all_default_panels) > 0:
-                    config["default_panels"] = all_default_panels
-
-            elif self.pipeline == PIPLELINE_CANCER:
-                # TODO WHEN GMS560 IS IN PRODUCTION
-                config = {}
-
-            output_path = self._write_yaml(config, self.pipeline_dir)
-            return (
-                True,
-                {
-                    "generated": True,
-                    "case_id": case_id,
-                    "config_path": output_path,
-                    "panels": all_panels,
-                },
+            case_entry = self._case_entry(
+                case_files=case_files,
+                case_id=case_id,
+                case_name=case_name,
+                pipeline=pipeline,
+                panels=igene_panels,
             )
-
+            sample_entries = self._sample_entries(
+                sample_ids=sample_ids, sample_files=sample_files
+            )
+            case_entry["samples"] = sample_entries
+            return (True, case_entry)
         except Exception as e:
-            return (
-                False,
-                {
-                    "generated": False,
-                    "error": str(e),
-                },
-            )
+            return (False, {"error": str(e)})
 
-    def _scout_panel_from_igene_panel(self, igene_panel):
+    def _get_scout_panels(self, panels: list) -> tuple:
+        default_panels = []
+        for p in panels:
+            if p == "SNV_WGS":
+                continue
+            default_panels.append(self._scout_panel_from_igene_panel(p))
+            log.info(f"using scout panel {default_panels[-1]} (iGene panel {p})")
+
+        default_panels = list(set(default_panels))
+        all_panels = default_panels + ["PANELAPP-GREEN"]
+
+        return (default_panels, all_panels)
+
+    def _scout_panel_from_igene_panel(self, igene_panel: str) -> str:
         pat = re.compile(r"^(.+)_(PAN|SP)_WGS_v\.?\d+\.\d+$")
         m = pat.match(igene_panel)
         if m is None:
@@ -196,103 +120,123 @@ class GenerateLoadConfigAction(Action):
             return scout_panel.lower()
         return scout_panel
 
-    def _read_samplesheet(self, dir: Path) -> csv.DictReader:
-        samplesheet = dir / "samplesheet.csv"
-        if not samplesheet.exists():
-            raise IOError("could not find samplesheet")
-        with open(samplesheet) as f:
-            r = csv.DictReader(f.readlines())
-        return r
+    def _case_entry(
+        self,
+        case_files: list,
+        case_id: str,
+        case_name: str,
+        pipeline: str,
+        panels: list,
+    ) -> dict:
 
-    def _get_case_id(self, dir: Path) -> str:
-        case_id = None
-        try:
-            r = self._read_samplesheet(dir)
-        except:
-            raise
-        for line in r:
-            if case_id is not None and case_id != line["case_id"]:
-                raise ValueError("multiple case IDs in samplesheet")
-            case_id = line["case_id"]
-        if case_id is None:
-            raise ValueError("case ID not found")
-        if "-" in case_id:
-            raise ValueError(f"case IDs cannot contain dashes: {case_id}")
-        return case_id
-
-    def _build_sample_entries(self, samples):
-        sample_entries = []
-
-        for sample in samples:
-            sample_name = (
-                sample.get("sample_id") or sample.get("name") or sample.get("sample")
-            )
-
-            if not sample_name:
-                raise ValueError("Could not determine sample name from sample payload")
-
-            entry = {
-                "sample_id": sample_name,
-                "bam_file": self._sample_file(self.pipeline_dir, "bam", sample_name),
-                "d4_file": self._sample_file(self.pipeline_dir, "d4", sample_name),
-                "sex": sample.get("sex"),
-                "phenotype": sample.get("phenotype"),
-                "chromograph_autozygous": self._sample_file(
-                    self.pipeline_dir, "chromograph_autozygous", sample_name
-                ),
-                "chromograph_coverage": self._sample_file(
-                    self.pipeline_dir, "chromograph_coverage", sample_name
-                ),
+        owner = self.config["owners_map"][pipeline]  # get from pack configuration
+        genome = self.config["genomes_map"][pipeline]
+        case_entry = {}
+        if pipeline == PIPELINE_RD:
+            scout_files = self._parse_files(case_files, level="case")
+            case_entry = {
+                "family": case_id,
+                "family_name": case_name if case_name is not None else case_id,
+                "human_genome_build": genome,
+                "rank_model_version": "0.1",
+                "owner": owner,
             }
-            sample_entries.append(entry)
+            # Add case specific files
+            for scout_file, file in scout_files.items():
+                case_entry[scout_file] = file
+            # Get analysis date from multiqc
+            multiqc = scout_files.get("multiqc")
+            if multiqc is None:
+                analysis_date = datetime.now()
+            else:
+                info = os.stat(multiqc)
+                analysis_date = datetime.fromtimestamp(info.st_mtime)
+            case_entry["analysis_date"] = analysis_date
+            default_panels, all_panels = self._get_scout_panels(panels)
 
+            if len(all_panels) > 0:
+                case_entry["gene_panels"] = all_panels
+            if len(default_panels) > 0:
+                case_entry["default_panels"] = default_panels
+
+        return case_entry
+
+    def _sample_entries(self, sample_ids, sample_files: dict) -> list:
+
+        sample_entries = []
+        for sample_id in sample_ids:
+            parsed_files = self._parse_files(sample_files[sample_id], level="sample")
+            sample_entry = {}
+            sample_entry["chromograph_images"] = {}
+            for scout_name, file_path in parsed_files.items():
+                if scout_name in SCOUT_CHROMOGRAPH_FILE_PREFIXES:
+                    sample_entry["chromograph_images"][scout_name] = file_path
+                else:
+                    sample_entry[scout_name] = file_path
+            sample_entries.append(sample_entry)
         return sample_entries
 
-    def _case_file(
-        self, dir: Path, filetype: str, case_id: str | None
-    ) -> Optional[str]:
-        if filetype not in PIPELINE_CASE_FILES:
-            raise KeyError("invalid case file type: {filetype}")
-        p = (
-            dir
-            / PIPELINE_OUTPUT_DIR
-            / PIPELINE_CASE_FILES[filetype].format(case=case_id)
-        )
-        log.debug(f"asset case={case_id} asset={filetype} path={p} exists={p.exists()}")
-        if not p.exists():
-            return None
-        return str(p)
+    def _parse_files(self, files: list, level: str):
 
-    def _sample_file(self, dir: Path, filetype: str, sample: str) -> Optional[str]:
-        if filetype not in PIPELINE_SAMPLE_FILES:
-            raise KeyError("invalid sample file type: {filetype}")
-        p = (
-            dir
-            / PIPELINE_OUTPUT_DIR
-            / PIPELINE_SAMPLE_FILES[filetype]["path"].format(sample=sample)
-        )
-        log.debug(
-            f"asset sample={sample} asset={filetype} path={p} exists={p.exists()}"
-        )
-        if not PIPELINE_SAMPLE_FILES[filetype]["is_prefix"] and not p.exists():
-            return None
-        return str(p)
+        parsed_files = {}
 
-    def _get_analysis_date(self, dir: Path):
-        multiqc = self._case_file(dir, "multiqc", None)
-        if multiqc is None:
-            return datetime.now()
-        info = os.stat(multiqc)
-        analysis_date = datetime.fromtimestamp(info.st_mtime)
-        log.debug(f"analysis date: {analysis_date}")
-        return analysis_date
+        if level not in ("case", "sample"):
+            log.warning("level must be 'case' or 'sample'")
+        if level == "case":
+            for file in files:
+                file_path = file["path"]
+                if not Path(file_path).exists():
+                    raise FileNotFoundError(f"{file_path} does not exist")
+                for scout_key, file_suffix in SCOUT_CASE_FILE_SUFFIXES.items():
+                    if file_path.endswith(file_suffix):
+                        parsed_files[scout_key] = file_path
+                        break
 
-    def _write_yaml(self, config, output_dir):
-        outdir = Path(output_dir)
-        outdir.mkdir(parents=True, exist_ok=True)
+        if level == "sample":
+            for file in files:
+                is_prefix = False
+                file_path = file["path"]
+                for _, file_prefix in SCOUT_CHROMOGRAPH_FILE_PREFIXES.items():
+                    if file_prefix in file_path:
+                        is_prefix = True
 
-        path = outdir / f"scout_load_config.yaml"
-        with open(path, "w") as fh:
-            yaml.safe_dump(config, fh, sort_keys=False)
+                if not is_prefix:
+                    if not Path(file_path).exists():
+                        raise FileNotFoundError(f"{file_path} does not exist")
+                    for scout_key, file_suffix in SCOUT_SAMPLE_FILE_SUFFIXES.items():
+                        if file_path.endswith(file_suffix):
+                            parsed_files[scout_key] = file_path
+                            break
 
-        return str(path)
+                else:
+                    for (
+                        scout_key,
+                        file_prefix,
+                    ) in SCOUT_CHROMOGRAPH_FILE_PREFIXES.items():
+                        if file_prefix in file_path:
+                            parsed_files[scout_key] = (
+                                file_path.split(file_prefix)[0] + file_prefix
+                            )
+
+        return parsed_files
+
+
+SCOUT_CASE_FILE_SUFFIXES = {
+    "vcf_snv": "_snv_ranked_clinical.vcf.gz",
+    "vcf_snv_research": "_snv_ranked_research.vcf.gz",
+    "peddy_ped": ".peddy.ped",
+    "peddy_sex": ".sex_check.csv",
+    "peddy_check": ".ped_check.csv",
+    "multiqc": "multiqc_report.html",
+    "smn_tsv": "_smncopynumbercaller.tsv",
+}
+
+SCOUT_SAMPLE_FILE_SUFFIXES = {
+    "d4_path": "_mosdepth.per-base.d4",
+    "alignment_path": "_sorted_md.bam",
+}
+
+SCOUT_CHROMOGRAPH_FILE_PREFIXES = {
+    "autozygous": "_rhocallviz_chr",
+    "coverage": "_tidditcov_chr",
+}

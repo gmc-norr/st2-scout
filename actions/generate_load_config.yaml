@@ -1,42 +1,70 @@
+---
 name: generate_load_config
+description: >
+  Generate a Scout load configuration dictionary from pipeline output files, and meta data.
+  The resulting object is intended to be written to YAML and loaded into Scout.
 runner_type: python-script
-description: Generate Scout load config YAML 
-enabled: true
 entry_point: generate_load_config.py
-
+enabled: true
 
 parameters:
-  samples:
+  sample_ids:
     type: array
     required: true
+    description: >
+      List of sample identifiers belonging to the case.
+      Each sample_id must have a corresponding entry in sample_files.
 
-  pipeline_dir:
+  case_id:
     type: string
     required: true
+    description: >
+      Scout case/family identifier.
+
+  case_name:
+    type: string
+    required: false
+    description: >
+      Human-readable case name. If omitted, case_id is used.
+
+  sample_files:
+    type: object
+    required: true
+    description: >
+      Mapping from sample_id to a list of file objects. exported from cleve
+      Each file object must contain a "path" key.
+
+      Example:
+        {
+          "SAMPLE1": [
+            {"path": "/path/to/SAMPLE1_sorted_md.bam"},
+            {"path": "/path/to/SAMPLE1_mosdepth.per-base.d4"}
+          ]
+        }
+
+  case_files:
+    type: array
+    required: true
+    description: >
+      List of case-level file objects, exported from cleve
+      Each entry must contain a "path" key.
+
+      Example:
+        [
+          {"path": "/path/to/FAM01_snv_ranked_clinical.vcf.gz"},
+          {"path": "/path/to/multiqc_report.html"}
+        ]
 
   pipeline:
     type: string
     required: true
-    enum:
-      - raredisease
-      - gms-solid
+    description: >
+      Pipeline identifier used to determine genome build and owner
+      (for example: "nf-core-raredisease", "gms-solid").
 
-  panels:
+  igene_panels:
     type: array
-    required: false
-    default: []
-
-  default_panels:
-    type: array
-    required: false
-    default: []
-
-output_schema:
-  type: object
-  properties:
-    config_path:
-      type: string
-    case_id:
-      type: string
-    generated:
-      type: boolean
+    required: true
+    description: >
+      List of iGene panels.
+      These are converted to Scout gene panels.

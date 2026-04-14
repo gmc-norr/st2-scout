@@ -1,0 +1,90 @@
+
+version: 1.0
+
+description: Build Scout load config for a case, and load into scout and loqusdb. 
+
+input:
+  - case_id
+  - cleve_case_id
+  - sample_ids
+  - pipeline
+  - analysis_id
+  - output_path
+
+vars:
+  - sample_files: {}
+  - case_files: []
+  - igene_panels: []
+  - case_name: null
+
+output:
+  - load_config_path: <% ctx().load_config_path %>
+
+tasks:
+
+  get_sample_files:
+    with: sample_id in <% ctx().sample_ids %>
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().analysis_id %>
+      level: sample
+      parent_id: <% item() %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          sample_files: <% ctx().sample_files | combine({ item(): result().result.body }) %>
+
+  get_case_files:
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().analysis_id %>
+      level: case
+      parent_id: <% ctx().cleve_case_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - case_files: <% result().result.body %>
+
+  get_panels:
+    action: igene.get_sample
+    input:
+      sample_id: <% ctx().sample_ids[0] %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - igene_panels: <% result().result.body.Panels %>
+          - case_name: <% result().result.body.ParentSampleID %>
+
+  generate_load_config:
+    action: gmc_norr_scout.generate_load_config
+    input:
+      case_id: <% ctx().case_id %>
+      case_name: <% ctx().case_name %>
+      sample_ids: <% ctx().sample_ids %>
+      sample_files: <% ctx().sample_files %>
+      case_files: <% ctx().case_files %>
+      pipeline: <% ctx().pipeline %>
+      igene_panels: <% ctx().igene_panels %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          load_config: <% result().result[1] %>
+        do: write_load_config
+
+  write_load_config:
+    action: gmc_norr_scout.write_load_config
+    input:
+      config: <% ctx().load_config %>
+      output_path: <% ctx().output_path %>
+      overwrite: true
+    next:
+      - when: <% succeeded() %>
+        publish:
+          load_config_path: <% result().result.path %>
+        do: upload_case
+
+  upload_case:
+    action: gmc_norr_scout.load_case
+    input:
+      config_path: <% ctx().load_config_path %>
+

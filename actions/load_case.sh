@@ -1,19 +1,9 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
 
-LOAD_CONFIG=""
-CONTAINER_NAME="scout"
-
-for arg in "$@"; do
-  case "$arg" in
-    --load_config=*)
-      LOAD_CONFIG="${arg#*=}"
-      ;;
-    --container_name=*)
-      CONTAINER_NAME="${arg#*=}"
-      ;;
-  esac
-done
+LOAD_CONFIG="$1"
+CONTAINER_NAME="$2"
 
 if [[ -z "${LOAD_CONFIG}" ]]; then
   echo "Missing required parameter: load_config" >&2
