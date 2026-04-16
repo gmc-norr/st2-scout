@@ -27,12 +27,13 @@ tasks:
     action: cleve.get_analysis_files
     input:
       analysis_id: <% ctx().analysis_id %>
+      parent_id: <% item(sample_id) %>
       level: sample
-      parent_id: <% item() %>
     next:
       - when: <% succeeded() %>
         publish:
-          sample_files: <% ctx().sample_files | combine({ item(): result().result.body }) %>
+          sample_files: <% dict(zip(ctx().sample_ids, result().items.select($.result.body))) %>
+        do: generate_load_config
 
   get_case_files:
     action: cleve.get_analysis_files
@@ -44,18 +45,21 @@ tasks:
       - when: <% succeeded() %>
         publish:
           - case_files: <% result().result.body %>
+        do: generate_load_config
 
   get_panels:
     action: igene.get_sample
     input:
-      sample_id: <% ctx().sample_ids[0] %>
+      sample_id: <% ctx().sample_ids.first() %>
     next:
       - when: <% succeeded() %>
         publish:
           - igene_panels: <% result().result.body.Panels %>
           - case_name: <% result().result.body.ParentSampleID %>
+        do: generate_load_config
 
   generate_load_config:
+    join: all
     action: gmc_norr_scout.generate_load_config
     input:
       case_id: <% ctx().case_id %>
@@ -81,10 +85,18 @@ tasks:
       - when: <% succeeded() %>
         publish:
           load_config_path: <% result().result.path %>
-        do: upload_case
+        do: load_case
 
-  upload_case:
+  load_case:
     action: gmc_norr_scout.load_case
     input:
       config_path: <% ctx().load_config_path %>
+    next:
+      - when: <% succeeded() %>
+        do: load_variants
 
+  load_variants:
+    action: scout.load_variants
+    input:
+      variant_path: <% ctx().load_config.select(snv_vcf) %>
+    

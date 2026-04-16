@@ -1,0 +1,46 @@
+---
+scout_host:
+  description: Host machine for scout
+  type: string
+  required: true
+
+scout_cwd:
+  description: working directory on scout host
+  type: string
+  required: true
+
+owners_map:
+  description: Mapping pipeline/analysis type to scout owner/institute
+  type: object
+  required: true
+  proterties:
+    raredisease:
+      type: string
+      description: scout institute for raredisease pipeline
+      required: true
+
+owners_map:
+  description: Mapping pipeline/analysis type to scout genome build
+  type: object
+  required: true
+  proterties:
+    raredisease:
+      type: string
+      description: genome build for raredisease pipeline
+      required: true
+      default: "38"
+
+scout_case_file_suffixes:
+  description: file suffixes for case files used in the scout load config
+  type: object
+  required: true
+
+scout_sample_file_suffixes:
+  description: file suffixes for sample files used in the scout load config
+  type: object
+  required: true
+
+scout_chromograph_file_prefixes:
+  description: file prefixes for sample chromograph files used in the scout load config
+  type: object
+  required: true

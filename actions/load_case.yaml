@@ -10,16 +10,16 @@ parameters:
     type: string
     description: "Remote host running the Scout Docker container"
     required: true
+    default: {{ config_context.scout_host }}
+
+  cwd:
+    type: string
+    description: "Path to directory with scout docker-compose"
+    required: true
+    default: {{ config_context.scout_cwd }}
 
   load_config:
     type: string
     description: "Path to load-config.yaml on the remote host"
     required: true
     position: 0
-
-  container_name:
-    type: string
-    description: "Docker container name running Scout"
-    required: false
-    default: scout
-    position: 1
