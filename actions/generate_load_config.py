@@ -188,7 +188,7 @@ class GenerateLoadConfigAction(Action):
                 file_path = file["path"]
                 if not Path(file_path).exists():
                     raise FileNotFoundError(f"{file_path} does not exist")
-                for scout_key, file_suffix in self.config["scout_case_file_suffxies"].items():
+                for scout_key, file_suffix in self.config["scout_case_file_suffixes"].items():
                     if file_path.endswith(file_suffix):
                         parsed_files[scout_key] = file_path
                         break
