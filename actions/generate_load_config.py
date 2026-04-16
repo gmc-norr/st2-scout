@@ -49,7 +49,7 @@ PIPELINE_SAMPLE_FILES = {
 }
 
 
-PIPELINE_RD = "nf-core-raredisease"
+PIPELINE_RD = "raredisease"
 PIPELINE_CANCER = "gms-solid"
 
 OWNERS = {
@@ -167,9 +167,10 @@ class GenerateLoadConfigAction(Action):
         for sample_id in sample_ids:
             parsed_files = self._parse_files(sample_files[sample_id], level="sample")
             sample_entry = {}
-            sample_entry["chromograph_images"] = {}
             for scout_name, file_path in parsed_files.items():
-                if scout_name in SCOUT_CHROMOGRAPH_FILE_PREFIXES:
+                if scout_name in self.config["scout_chromograph_file_prefixes"]:
+                    if sample_entry.get("chromograph_images") is None:
+                        sample_entry["chromograph_images"] = {}
                     sample_entry["chromograph_images"][scout_name] = file_path
                 else:
                     sample_entry[scout_name] = file_path
@@ -187,7 +188,7 @@ class GenerateLoadConfigAction(Action):
                 file_path = file["path"]
                 if not Path(file_path).exists():
                     raise FileNotFoundError(f"{file_path} does not exist")
-                for scout_key, file_suffix in SCOUT_CASE_FILE_SUFFIXES.items():
+                for scout_key, file_suffix in self.config["scout_case_file_suffxies"].items():
                     if file_path.endswith(file_suffix):
                         parsed_files[scout_key] = file_path
                         break
@@ -196,14 +197,14 @@ class GenerateLoadConfigAction(Action):
             for file in files:
                 is_prefix = False
                 file_path = file["path"]
-                for _, file_prefix in SCOUT_CHROMOGRAPH_FILE_PREFIXES.items():
+                for _, file_prefix in self.config["scout_chromograph_file_prefixes"].items():
                     if file_prefix in file_path:
                         is_prefix = True
 
                 if not is_prefix:
                     if not Path(file_path).exists():
                         raise FileNotFoundError(f"{file_path} does not exist")
-                    for scout_key, file_suffix in SCOUT_SAMPLE_FILE_SUFFIXES.items():
+                    for scout_key, file_suffix in self.config["scout_sample_file_suffixes"].items():
                         if file_path.endswith(file_suffix):
                             parsed_files[scout_key] = file_path
                             break
