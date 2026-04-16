@@ -13,7 +13,7 @@ owners_map:
   description: Mapping pipeline/analysis type to scout owner/institute
   type: object
   required: true
-  proterties:
+  properties:
     raredisease:
       type: string
       description: scout institute for raredisease pipeline
@@ -23,7 +23,7 @@ genomes_map:
   description: Mapping pipeline/analysis type to scout genome build
   type: object
   required: true
-  proterties:
+  properties:
     raredisease:
       type: string
       description: genome build for raredisease pipeline
