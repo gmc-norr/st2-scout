@@ -19,7 +19,7 @@ owners_map:
       description: scout institute for raredisease pipeline
       required: true
 
-owners_map:
+genomes_map:
   description: Mapping pipeline/analysis type to scout genome build
   type: object
   required: true
