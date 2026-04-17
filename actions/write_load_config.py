@@ -46,7 +46,7 @@ class WriteLoadConfigAction(Action):
                     sort_keys=False,
                 )
 
-            log.info("Wrote Scout load config to %s", path)
+            log.info(f"Wrote Scout load config to {path}")
 
             return (
                 True,

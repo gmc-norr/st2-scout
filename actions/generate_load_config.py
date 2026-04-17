@@ -8,7 +8,6 @@ import logging
 
 log = logging.getLogger(__name__)
 
-
 try:
     from st2common.runners.base_action import Action
 except ImportError:
@@ -17,51 +16,8 @@ except ImportError:
         def __init__(self, config=None):
             self.config = config
 
-
-PIPELINE_CASE_FILES = {
-    "clinical_snv": "rank_and_filter/{case}_snv_ranked_clinical.vcf.gz",
-    "research_snv": "rank_and_filter/{case}_snv_ranked_research.vcf.gz",
-    "peddy_ped": "peddy/{case}.peddy.ped",
-    "peddy_sex": "peddy/{case}.sex_check.csv",
-    "peddy_check": "peddy/{case}.ped_check.csv",
-    "multiqc": "multiqc/multiqc_report.html",
-    "smn_tsv": "smncopynumbercaller/out/{case}_smncopynumbercaller.tsv",
-}
-
-
-PIPELINE_SAMPLE_FILES = {
-    "d4": {
-        "path": "qc_bam/{sample}_mosdepth.per-base.d4",
-        "is_prefix": False,
-    },
-    "bam": {
-        "path": "alignment/{sample}_sorted_md.bam",
-        "is_prefix": False,
-    },
-    "chromograph_autozygous": {
-        "path": "annotate_snv/genome/{sample}_rhocallviz_autozyg_chromograph/{sample}_rhocallviz_chr",
-        "is_prefix": True,
-    },
-    "chromograph_coverage": {
-        "path": "qc_bam/{sample}_chromographcov/{sample}_tidditcov_chr",
-        "is_prefix": True,
-    },
-}
-
-
 PIPELINE_RD = "raredisease"
 PIPELINE_CANCER = "gms-solid"
-
-OWNERS = {
-    PIPELINE_RD: "clingen-rd",
-    PIPELINE_CANCER: "clingen-cancer",
-}
-
-GENOME = {
-    PIPELINE_RD: "38",
-    PIPELINE_CANCER: "37",
-}
-
 
 class GenerateLoadConfigAction(Action):
     """Action for creating load configs for scout"""
@@ -132,6 +88,7 @@ class GenerateLoadConfigAction(Action):
         owner = self.config["owners_map"][pipeline]  # get from pack configuration
         genome = self.config["genomes_map"][pipeline]
         case_entry = {}
+
         if pipeline == PIPELINE_RD:
             scout_files = self._parse_files(case_files, level="case")
             case_entry = {
@@ -158,6 +115,8 @@ class GenerateLoadConfigAction(Action):
                 case_entry["gene_panels"] = all_panels
             if len(default_panels) > 0:
                 case_entry["default_panels"] = default_panels
+
+        # TODO fix case_entry for gms-solid
 
         return case_entry
 
@@ -220,24 +179,3 @@ class GenerateLoadConfigAction(Action):
                             )
 
         return parsed_files
-
-
-SCOUT_CASE_FILE_SUFFIXES = {
-    "vcf_snv": "_snv_ranked_clinical.vcf.gz",
-    "vcf_snv_research": "_snv_ranked_research.vcf.gz",
-    "peddy_ped": ".peddy.ped",
-    "peddy_sex": ".sex_check.csv",
-    "peddy_check": ".ped_check.csv",
-    "multiqc": "multiqc_report.html",
-    "smn_tsv": "_smncopynumbercaller.tsv",
-}
-
-SCOUT_SAMPLE_FILE_SUFFIXES = {
-    "d4_path": "_mosdepth.per-base.d4",
-    "alignment_path": "_sorted_md.bam",
-}
-
-SCOUT_CHROMOGRAPH_FILE_PREFIXES = {
-    "autozygous": "_rhocallviz_chr",
-    "coverage": "_tidditcov_chr",
-}

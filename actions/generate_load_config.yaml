@@ -23,9 +23,8 @@ parameters:
 
   case_name:
     type: string
-    required: false
-    description: >
-      Human-readable case name. If omitted, case_id is used.
+    required: true
+    description: case name, will be displayd to scout user
 
   sample_files:
     type: object
@@ -47,12 +46,11 @@ parameters:
     required: true
     description: >
       List of case-level file objects, exported from cleve
-      Each entry must contain a "path" key.
 
       Example:
         [
-          {"path": "/path/to/FAM01_snv_ranked_clinical.vcf.gz"},
-          {"path": "/path/to/multiqc_report.html"}
+          {"path": "/path/to/FAM01_snv_ranked_clinical.vcf.gz", "level": "case", ...},
+          {"path": "/path/to/multiqc_report.html", ...}
         ]
 
   pipeline:
@@ -66,5 +64,4 @@ parameters:
     type: array
     required: true
     description: >
-      List of iGene panels.
-      These are converted to Scout gene panels.
+      List of igene panels for a sample. These are converted to Scout gene panels.
