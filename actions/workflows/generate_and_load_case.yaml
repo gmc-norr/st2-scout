@@ -72,7 +72,7 @@ tasks:
   write_load_config:
     action: gmc_norr_scout.write_load_config
     input:
-      config: <% ctx().load_config %>
+      load_config: <% ctx().load_config %>
       output_path: <% ctx().output_path %>
       overwrite: true
     next:
@@ -84,13 +84,13 @@ tasks:
   load_case:
     action: gmc_norr_scout.load_case
     input:
-      config_path: <% ctx().load_config_path %>
+      load_config: <% ctx().load_config_path %>
     next:
       - when: <% succeeded() %>
         do: load_variants
 
-  #load_variants:
-  #  action: scout.load_variants
-  #  input:
-  #    variant_path: <% ctx().load_config.select(snv_vcf) %>
+  load_variants:
+    action: gmc_norr_scout.load_variants
+    input:
+      variants: <% ctx().load_config.select(snv_vcf) %>
     
