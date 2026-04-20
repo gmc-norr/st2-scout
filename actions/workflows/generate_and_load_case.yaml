@@ -26,7 +26,7 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - sample_files: <% dict(zip(ctx().sample_ids, result().items.select($.result.body))) %>
+          - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
 
   get_case_files:
