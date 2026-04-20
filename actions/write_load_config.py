@@ -22,7 +22,7 @@ class WriteLoadConfigAction(Action):
 
     def run(
         self,
-        config: dict,
+        load_config: dict,
         output_path: str,
         overwrite: bool = False,
     ):
