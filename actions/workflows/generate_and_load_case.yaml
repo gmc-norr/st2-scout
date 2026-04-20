@@ -5,7 +5,6 @@ description: Build Scout load config for a case, and load into scout and loqusdb
 
 input:
   - case_id
-  - cleve_case_id
   - sample_ids
   - pipeline
   - analysis_id
@@ -34,7 +33,7 @@ tasks:
     input:
       analysis_id: <% ctx().analysis_id %>
       level: case
-      parent_id: <% ctx().cleve_case_id %>
+      parent_id: <% ctx().case_id %>
     next:
       - when: <% succeeded() %>
         publish:

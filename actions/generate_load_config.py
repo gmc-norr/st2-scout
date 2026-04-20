@@ -16,7 +16,7 @@ except ImportError:
         def __init__(self, config=None):
             self.config = config
 
-PIPELINE_RD = "raredisease"
+PIPELINE_RD = "nf-core-raredisease"
 PIPELINE_CANCER = "gms-solid"
 
 class GenerateLoadConfigAction(Action):
