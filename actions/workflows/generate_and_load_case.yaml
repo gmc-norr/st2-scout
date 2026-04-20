@@ -26,7 +26,7 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          sample_files: <% dict(zip(ctx().sample_ids, result().items.select($.result.body))) %>
+          - sample_files: <% dict(zip(ctx().sample_ids, result().items.select($.result.body))) %>
         do: generate_load_config
 
   get_case_files:
@@ -66,7 +66,7 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          load_config: <% result().result %>
+          - load_config: <% result().result %>
         do: write_load_config
 
   write_load_config:
@@ -78,7 +78,7 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          load_config_path: <% result().result.path %>
+          - load_config_path: <% result().result.path %>
         do: load_case
 
   load_case:
