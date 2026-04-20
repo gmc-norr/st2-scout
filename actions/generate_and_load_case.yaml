@@ -1,0 +1,34 @@
+---
+name: generate_and_load_case
+pack: gmc_norr_scout
+description: Generate load configs and upload to scout
+runner_type: orquesta
+entry_point: workflows/generate_and_load_case.yaml
+enabled: true
+
+parameters:
+  case_id:
+    description: wonderwords generated case-id for case
+    type: string
+    required: true
+  cleve_case_id:
+    description: case-id in cleve
+    type: string
+    required: true
+  sample_ids:
+    description: array of sample ids in case
+    type: array
+    required: true
+  pipeline:
+    description: name of analysis pipeline, e.g. raredisease 
+    type: string
+    required: true
+  analysis_id:
+    description: cleve analysis-id
+    type: string
+    required: true
+  output_path:
+    description: output path for scout load config
+    type: string
+    required: true
+    
