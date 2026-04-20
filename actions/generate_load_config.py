@@ -172,7 +172,7 @@ class GenerateLoadConfigAction(Action):
                     for (
                         scout_key,
                         file_prefix,
-                    ) in SCOUT_CHROMOGRAPH_FILE_PREFIXES.items():
+                    ) in self.config["scout_chromograph_file_prefixes"].items():
                         if file_prefix in file_path:
                             parsed_files[scout_key] = (
                                 file_path.split(file_prefix)[0] + file_prefix
