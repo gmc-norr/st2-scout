@@ -89,8 +89,8 @@ tasks:
       - when: <% succeeded() %>
         do: load_variants
 
-  load_variants:
-    action: scout.load_variants
-    input:
-      variant_path: <% ctx().load_config.select(snv_vcf) %>
+  #load_variants:
+  #  action: scout.load_variants
+  #  input:
+  #    variant_path: <% ctx().load_config.select(snv_vcf) %>
     
