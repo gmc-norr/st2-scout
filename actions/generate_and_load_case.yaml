@@ -11,10 +11,6 @@ parameters:
     description: wonderwords generated case-id for case
     type: string
     required: true
-  cleve_case_id:
-    description: case-id in cleve
-    type: string
-    required: true
   sample_ids:
     description: array of sample ids in case
     type: array
