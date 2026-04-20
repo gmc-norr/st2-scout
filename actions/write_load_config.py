@@ -32,7 +32,7 @@ class WriteLoadConfigAction(Action):
 
             if path.exists() and not overwrite:
                 raise FileExistsError(
-                    f"Config already exists: {path} (set overwrite=true to replace)"
+                    f"Load Config already exists: {path} (set overwrite=true to replace)"
                 )
 
             parent_dir = path.parent
@@ -41,7 +41,7 @@ class WriteLoadConfigAction(Action):
 
             with path.open("w") as fh:
                 yaml.safe_dump(
-                    config,
+                    load_config,
                     fh,
                     sort_keys=False,
                 )

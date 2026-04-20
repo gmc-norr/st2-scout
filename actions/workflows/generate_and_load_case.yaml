@@ -41,7 +41,7 @@ tasks:
           - case_files: <% result().result.body %>
         do: generate_load_config
 
-  get_panels:
+  get_sample_info:
     action: igene.get_sample
     input:
       sample_id: <% ctx().sample_ids.first() %>
