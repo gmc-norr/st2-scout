@@ -18,6 +18,12 @@ parameters:
     required: true
     default: "{{ config_context.scout_cwd }}"
 
+  timeout:
+    type: int
+    description: "timeout for loading a case into scout"
+    required: true
+    default: 1800
+
   load_config:
     type: string
     description: "Path to load-config.yaml on the remote host"
