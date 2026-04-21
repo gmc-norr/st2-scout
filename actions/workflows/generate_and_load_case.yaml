@@ -41,15 +41,19 @@ tasks:
         do: generate_load_config
 
   get_sample_info:
+    with: sample_id in <% ctx().sample_ids %>
     action: igene.get_sample
     input:
-      sample_id: <% ctx().sample_ids.first() %>
+      sample_id: <% item(sample_id) %>
     next:
       - when: <% succeeded() %>
         publish:
-          - igene_panels: <% result().result.body.Panels %>
-          - case_name: <% result().result.body.ParentSampleID %>
+          - igene_panels: <% result().first().result.body.Panels %>
+          - case_name: <% result().first().result.body.ParentSampleID %>
+          - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
+
+
 
   generate_load_config:
     join: all
@@ -59,6 +63,7 @@ tasks:
       case_name: <% ctx().case_name %>
       sample_ids: <% ctx().sample_ids %>
       sample_files: <% ctx().sample_files %>
+      sample_info: <% ctx().sample_info %>
       case_files: <% ctx().case_files %>
       pipeline: <% ctx().pipeline %>
       igene_panels: <% ctx().igene_panels %>

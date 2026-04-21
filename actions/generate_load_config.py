@@ -28,6 +28,7 @@ class GenerateLoadConfigAction(Action):
         case_id: str,
         case_name: str,
         sample_files: dict,
+        sample_info: dict,
         case_files: list,
         pipeline: str,
         igene_panels: list,
@@ -42,7 +43,7 @@ class GenerateLoadConfigAction(Action):
                 panels=igene_panels,
             )
             sample_entries = self._sample_entries(
-                sample_ids=sample_ids, sample_files=sample_files
+                sample_ids=sample_ids, sample_files=sample_files, sample_info=sample_info
             )
             case_entry["samples"] = sample_entries
             return (True, case_entry)
@@ -120,7 +121,7 @@ class GenerateLoadConfigAction(Action):
 
         return case_entry
 
-    def _sample_entries(self, sample_ids, sample_files: dict) -> list:
+    def _sample_entries(self, sample_ids, sample_files: dict, sample_info: dict) -> list:
 
         sample_entries = []
         for sample_id in sample_ids:
@@ -133,8 +134,21 @@ class GenerateLoadConfigAction(Action):
                     sample_entry["chromograph_images"][scout_name] = file_path
                 else:
                     sample_entry[scout_name] = file_path
+            sample_entry["sex"] = self._parse_sex(sample_info[sample_id].get("sex"))
+            sample_entry["sample_id"] = sample_id
+            sample_entry["sample_name"] = sample_id
+            sample_entry["phenotype"] = "affected" #TODO change when running trios
+            sample_entry["analysis_type"] = "wgs" # TODO change when running gms-solid
             sample_entries.append(sample_entry)
         return sample_entries
+
+    def _parse_sex(self, igene_sex):
+        if igene_sex == "F":
+            return "female"
+        if igene_sex == "M":
+            return "male"
+        return igene_sex
+
 
     def _parse_files(self, files: list, level: str):
 

@@ -40,6 +40,12 @@ parameters:
             {"path": "/path/to/SAMPLE1_mosdepth.per-base.d4"}
           ]
         }
+  
+  sample_info:
+    type: object
+    required: true
+    description: >
+      Mapping from sample_id to igene sample_information
 
   case_files:
     type: array

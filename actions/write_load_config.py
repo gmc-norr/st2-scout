@@ -28,6 +28,10 @@ class WriteLoadConfigAction(Action):
     ):
 
         try:
+
+            if not output_path.endswith(".yaml"):
+                raise FileNotFoundError(f"{output_path} needs to end with .yaml")
+
             path = Path(output_path)
 
             if path.exists() and not overwrite:
