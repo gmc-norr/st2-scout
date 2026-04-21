@@ -135,7 +135,7 @@ class GenerateLoadConfigAction(Action):
                     sample_entry["chromograph_images"][scout_name] = file_path
                 else:
                     sample_entry[scout_name] = file_path
-            sample_entry["sex"] = self._parse_sex(sample_info[sample_id].get("sex"))
+            sample_entry["sex"] = self._parse_sex(sample_info[sample_id].get("Sex"))
             sample_entry["sample_id"] = sample_id
             sample_entry["sample_name"] = sample_id
             sample_entry["phenotype"] = "affected" #TODO change when running trios
