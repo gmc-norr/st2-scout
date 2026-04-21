@@ -1,6 +1,6 @@
 ---
 name: generate_and_load_case
-pack: gmc_norr_scout
+pack: scout
 description: Generate load configs and upload to scout
 runner_type: orquesta
 entry_point: workflows/generate_and_load_case.yaml
