@@ -35,10 +35,11 @@ class GenerateLoadConfigAction(Action):
     ):
 
         try:
+
             case_entry = self._case_entry(
                 case_files=case_files,
                 case_id=case_id,
-                case_name=case_name,
+                case_name=case_name.replace("/", "_").replace("-", "_").replace(",", "_").replace(".", "_"),
                 pipeline=pipeline,
                 panels=igene_panels,
             )
