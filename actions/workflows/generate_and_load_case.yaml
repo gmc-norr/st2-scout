@@ -57,7 +57,7 @@ tasks:
 
   generate_load_config:
     join: all
-    action: gmc_norr_scout.generate_load_config
+    action: scout.generate_load_config
     input:
       case_id: <% ctx().case_id %>
       case_name: <% ctx().case_name %>
@@ -74,7 +74,7 @@ tasks:
         do: write_load_config
 
   write_load_config:
-    action: gmc_norr_scout.write_load_config
+    action: scout.write_load_config
     input:
       load_config: <% ctx().load_config %>
       output_path: "{{ctx().output_path}}/scout_load_config.yaml"
@@ -86,7 +86,7 @@ tasks:
         do: load_case
 
   load_case:
-    action: gmc_norr_scout.load_case
+    action: scout.load_case
     input:
       load_config: <% ctx().load_config_path %>
     next:
@@ -94,7 +94,7 @@ tasks:
         do: load_variants
 
   load_variants:
-    action: gmc_norr_scout.load_variants
+    action: scout.load_variants
     input:
       variants: <% ctx().load_config.select(snv_vcf) %>
     

@@ -1,7 +1,7 @@
 ---
-ref: gmc_norr_scout
-name: GMC Norr Scout
-description: GMC Norr pack for handling Scout automations
+ref: scout
+name: scout
+description: GMC Norr pack with actions for interacting with Scout
 version: 0.1.0 # x-release-please-version
 python_versions:
   - "3"
