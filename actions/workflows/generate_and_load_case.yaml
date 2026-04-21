@@ -77,7 +77,7 @@ tasks:
     action: gmc_norr_scout.write_load_config
     input:
       load_config: <% ctx().load_config %>
-      output_path: <% ctx().output_path %>
+      output_path: "{{ctx().output_path}}/scout_load_config.yaml"
       overwrite: true
     next:
       - when: <% succeeded() %>
