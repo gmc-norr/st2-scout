@@ -18,8 +18,20 @@ parameters:
     required: true
     default: "{{ config_context.scout_cwd }}"
 
-  variants:
+  vcf_file:
     type: string
     description: "Path to vcf-file containing variants"
     required: true
     position: 0
+
+  ped_file:
+    type: string
+    description: "Path to ped-file for case"
+    required: true
+    position: 1
+
+  config_file:
+    type: string
+    description: "Path to config-file to be used by loqusdb"
+    required: true
+    position: 2

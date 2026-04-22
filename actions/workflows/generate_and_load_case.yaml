@@ -91,10 +91,25 @@ tasks:
       load_config: <% ctx().load_config_path %>
     next:
       - when: <% succeeded() %>
+        do: get_loqusdb_config
+
+  get_loqusdb_files:
+    action: scout.get_loqusdb_config
+    input:
+      pipeline: <% ctx().pipeline %>
+      analysis_dir: "{{ctx().output_path}}/raredisease-results/"
+      case_id: <% ctx().case_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - loqusdb_config: <% result().loqusdb_config %>
+          - loqusdb_vcf: <% result().loqusdb_vcf %>
+          - loqusdb_ped: <% result().loqusdb_ped %>
         do: load_variants
 
   load_variants:
     action: scout.load_variants
     input:
-      variants: <% ctx().load_config.select(snv_vcf) %>
-    
+      vcf_file: <% ctx().loqusdb_vcf %>
+      ped_file: <% ctx().loqusdb_ped %>
+      config_file: <% ctx().loqusdb_config %>
