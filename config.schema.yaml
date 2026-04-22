@@ -44,3 +44,18 @@ scout_chromograph_file_prefixes:
   description: file prefixes for sample chromograph files used in the scout load config
   type: object
   required: true
+
+loqusdb_config_map:
+  description: mapping analysis pipeline to config file monted on docker container
+  type: object
+  required: true
+
+loqusdb_ped:
+  description: subdir and suffix for ped file to be used by loqusdb
+  type: object
+  required: true
+
+loqusdb_vcf:
+  description: subdir and suffix for vcf file to be used by loqusdb
+  type: object
+  required: true
