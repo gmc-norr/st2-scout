@@ -91,7 +91,7 @@ tasks:
       load_config: <% ctx().load_config_path %>
     next:
       - when: <% succeeded() %>
-        do: get_loqusdb_config
+        do: get_loqusdb_files
 
   get_loqusdb_files:
     action: scout.get_loqusdb_files
