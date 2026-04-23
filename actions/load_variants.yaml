@@ -22,7 +22,7 @@ parameters:
     type: integer
     description: "timeout for loading a case into scout"
     required: true
-    default: 600
+    default: 1800
 
   vcf_file:
     type: string
