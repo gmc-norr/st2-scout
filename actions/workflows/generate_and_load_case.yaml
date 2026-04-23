@@ -102,9 +102,9 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - loqusdb_config: <% result().loqusdb_config %>
-          - loqusdb_vcf: <% result().loqusdb_vcf %>
-          - loqusdb_ped: <% result().loqusdb_ped %>
+          - loqusdb_config: <% result().result.loqusdb_config %>
+          - loqusdb_vcf: <% result().result.loqusdb_vcf %>
+          - loqusdb_ped: <% result().result.loqusdb_ped %>
         do: load_variants
 
   load_variants:
