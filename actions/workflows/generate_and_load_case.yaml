@@ -97,7 +97,7 @@ tasks:
     action: scout.get_loqusdb_files
     input:
       pipeline: <% ctx().pipeline %>
-      analysis_dir: "{{ctx().output_path}}/raredisease-results/"
+      analysis_dir: "{{ctx().output_path}}/raredisease_results/"
       case_id: <% ctx().case_id %>
     next:
       - when: <% succeeded() %>
