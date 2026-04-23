@@ -94,7 +94,7 @@ tasks:
         do: get_loqusdb_config
 
   get_loqusdb_files:
-    action: scout.get_loqusdb_config
+    action: scout.get_loqusdb_files
     input:
       pipeline: <% ctx().pipeline %>
       analysis_dir: "{{ctx().output_path}}/raredisease-results/"
