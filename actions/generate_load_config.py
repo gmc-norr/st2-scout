@@ -4,20 +4,14 @@ import re
 from datetime import datetime
 from typing import Optional
 
+from st2common.runners.base_action import Action
+
 import logging
 
 log = logging.getLogger(__name__)
 
-try:
-    from st2common.runners.base_action import Action
-except ImportError:
-
-    class Action:
-        def __init__(self, config=None):
-            self.config = config
-
-PIPELINE_RD = "nf-core-raredisease"
-PIPELINE_CANCER = "gms-solid"
+PIPELINE_RD = "nf-core/raredisease"
+PIPELINE_CANCER = "genomic-medicine-sweden/Twist_Solid"
 
 class GenerateLoadConfigAction(Action):
     """Action for creating load configs for scout"""

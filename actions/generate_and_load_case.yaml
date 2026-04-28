@@ -16,7 +16,7 @@ parameters:
     type: array
     required: true
   pipeline:
-    description: name of analysis pipeline, e.g. raredisease 
+    description: name of analysis pipeline, e.g. nf-core/raredisease 
     type: string
     required: true
   analysis_id:

@@ -1,14 +1,7 @@
 from pathlib import Path
 import yaml
 
-try:
-    from st2common.runners.base_action import Action
-except ImportError:
-
-    class Action:
-        def __init__(self, config=None):
-            self.config = config
-
+from st2common.runners.base_action import Action
 
 import logging
 

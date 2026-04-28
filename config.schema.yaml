@@ -14,7 +14,7 @@ owners_map:
   type: object
   required: true
   properties:
-    nf-core-raredisease:
+    nf-core/raredisease:
       type: string
       description: scout institute for raredisease pipeline
       required: true
@@ -24,7 +24,7 @@ genomes_map:
   type: object
   required: true
   properties:
-    nf-core-raredisease:
+    nf-core/raredisease:
       type: string
       description: genome build for raredisease pipeline
       required: true
