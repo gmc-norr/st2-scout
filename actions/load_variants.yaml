@@ -1,0 +1,43 @@
+---
+name: load_variants
+description: "Load variants for a case into loqusdb"
+runner_type: remote-shell-script
+entry_point: load_variants.sh
+enabled: true
+
+parameters:
+  hosts:
+    type: string
+    description: "Remote host running the Scout Docker container"
+    required: true
+    default: "{{ config_context.scout_host }}"
+
+  cwd:
+    type: string
+    description: "Path to directory with scout docker-compose"
+    required: true
+    default: "{{ config_context.scout_cwd }}"
+
+  timeout:
+    type: integer
+    description: "timeout for loading a case into scout"
+    required: true
+    default: 1800
+
+  vcf_file:
+    type: string
+    description: "Path to vcf-file containing variants"
+    required: true
+    position: 0
+
+  ped_file:
+    type: string
+    description: "Path to ped-file for case"
+    required: true
+    position: 1
+
+  config_file:
+    type: string
+    description: "Path to config-file to be used by loqusdb"
+    required: true
+    position: 2
