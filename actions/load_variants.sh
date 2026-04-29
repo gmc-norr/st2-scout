@@ -31,4 +31,4 @@ if [[ ! -f "${PED}" ]]; then
   exit 1
 fi
 
-docker compose run loqusdb-cli loqusdb -c "${CONFIG}" load --variant-file "${SNV_VCF}" --family-file "${PED}"
+docker compose run loqusdb-cli loqusdb --rm -c "${CONFIG}" load --variant-file "${SNV_VCF}" --family-file "${PED}"
