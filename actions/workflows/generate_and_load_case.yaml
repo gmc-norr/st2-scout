@@ -92,6 +92,11 @@ tasks:
     next:
       - when: <% succeeded() %>
         do: get_loqusdb_files
+      - when <% failed() %>
+        publish:
+          - msg: <% result().stderr %>
+        do:
+          - report_failure
 
   get_loqusdb_files:
     action: scout.get_loqusdb_files
@@ -113,3 +118,30 @@ tasks:
       vcf_file: <% ctx().loqusdb_vcf %>
       ped_file: <% ctx().loqusdb_ped %>
       config_file: <% ctx().loqusdb_config %>
+    next:
+      - when <% succeeded() %>
+        do:
+          - report_success
+      - when <% failed() %>
+        publish:
+          - msg: <% result().stderr %>
+        do:
+          - report_failure
+
+  report_failure:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_ids %>"
+        message: <% ctx().msg %>
+    next:
+      - do: fail
+
+  report_success:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: "Case <% ctx().case_id %> and samples <% ctx().sample_ids %> loaded to scout and loqusdb "
+        message: "case and samples successfully loaded"
