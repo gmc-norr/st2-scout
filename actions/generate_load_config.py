@@ -83,6 +83,7 @@ class GenerateLoadConfigAction(Action):
 
         owner = self.config["owners_map"][pipeline]  # get from pack configuration
         genome = self.config["genomes_map"][pipeline]
+        rank_model_url = self.config["rankmodel_map"][pipeline]
         case_entry = {}
 
         if pipeline == PIPELINE_RD:
@@ -93,6 +94,7 @@ class GenerateLoadConfigAction(Action):
                 "human_genome_build": genome,
                 "rank_model_version": "0.1",
                 "owner": owner,
+                "rank_model_url": rank_model_url,
             }
             # Add case specific files
             for scout_file, file in scout_files.items():
