@@ -91,8 +91,9 @@ tasks:
       load_config: <% ctx().load_config_path %>
     next:
       - when: <% succeeded() %>
-        do: get_loqusdb_files
-      - when <% failed() %>
+        do: 
+          - get_loqusdb_files
+      - when: <% failed() %>
         publish:
           - msg: <% result().stderr %>
         do:
@@ -119,10 +120,10 @@ tasks:
       ped_file: <% ctx().loqusdb_ped %>
       config_file: <% ctx().loqusdb_config %>
     next:
-      - when <% succeeded() %>
+      - when: <% succeeded() %>
         do:
           - report_success
-      - when <% failed() %>
+      - when: <% failed() %>
         publish:
           - msg: <% result().stderr %>
         do:
