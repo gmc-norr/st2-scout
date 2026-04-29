@@ -33,7 +33,7 @@ class GenerateLoadConfigAction(Action):
             case_entry = self._case_entry(
                 case_files=case_files,
                 case_id=case_id,
-                case_name=case_name.replace("/", "_").replace("-", "_").replace(",", "_").replace(".", "_"),
+                case_name=case_name.replace("/", "-").replace(",", "-").replace(".", "-"),
                 pipeline=pipeline,
                 panels=igene_panels,
             )
@@ -112,7 +112,7 @@ class GenerateLoadConfigAction(Action):
             if len(all_panels) > 0:
                 case_entry["gene_panels"] = all_panels
             if len(default_panels) > 0:
-                case_entry["default_panels"] = default_panels
+                case_entry["default_gene_panels"] = default_panels
 
         # TODO fix case_entry for gms-solid
 
