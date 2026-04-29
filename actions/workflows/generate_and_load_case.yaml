@@ -95,7 +95,7 @@ tasks:
           - get_loqusdb_files
       - when: <% failed() %>
         publish:
-          - msg: <% result().stderr %>
+          - msg: <% result().values().first().stderr %>
         do:
           - report_failure
 
@@ -125,7 +125,7 @@ tasks:
           - report_success
       - when: <% failed() %>
         publish:
-          - msg: <% result().stderr %>
+          - msg: <% result().values().first().stderr %>
         do:
           - report_failure
 
