@@ -1,0 +1,9 @@
+---
+name: load_case.concurrency
+description: Limits the concurrent load into scout to one case at a time
+enabled: true
+resource_ref: scout.load_case
+policy_type: action.concurrency
+parameters:
+  action: delay
+  threshold: 1

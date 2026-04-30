@@ -1,0 +1,31 @@
+---
+name: load_case
+description: "Load a case into Scout from a load-config inside the Scout container"
+runner_type: remote-shell-script
+entry_point: load_case.sh
+enabled: true
+
+parameters:
+  hosts:
+    type: string
+    description: "Remote host running the Scout Docker container"
+    required: true
+    default: "{{ config_context.scout_host }}"
+
+  cwd:
+    type: string
+    description: "Path to directory with scout docker-compose"
+    required: true
+    default: "{{ config_context.scout_cwd }}"
+
+  timeout:
+    type: integer
+    description: "timeout for loading a case into scout"
+    required: true
+    default: 1800
+
+  load_config:
+    type: string
+    description: "Path to load-config.yaml on the remote host"
+    required: true
+    position: 0

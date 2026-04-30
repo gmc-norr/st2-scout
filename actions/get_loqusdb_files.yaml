@@ -1,0 +1,23 @@
+---
+name: get_loqusdb_files
+description: Get correct files for loqusdb, including config.
+runner_type: python-script
+entry_point: get_loqusdb_files.py
+enabled: true
+
+parameters:
+  pipeline:
+    type: string
+    required: true
+    description: analysis pipeline that has been run
+
+  analysis_dir:
+    type: string
+    required: true
+    description: parent dir for analysis
+
+  case_id:
+    type: string
+    required: true
+    description: case_id for case
+    

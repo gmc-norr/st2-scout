@@ -1,0 +1,22 @@
+---
+name: write_load_config
+description: Write a Scout load config dictionary to a YAML file
+runner_type: python-script
+entry_point: write_load_config.py
+enabled: true
+
+parameters:
+  load_config:
+    type: object
+    required: true
+    description: Scout load config represented as a Python dictionary
+
+  output_path:
+    type: string
+    required: true
+    description: Full path where the scout load config YAML file should be written
+
+  overwrite:
+    type: boolean
+    default: false
+    description: Overwrite the output file if it already exists
