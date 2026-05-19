@@ -1,0 +1,22 @@
+---
+name: annotate_twist_solid
+pack: scout
+description: Generate load configs and upload to scout
+runner_type: orquesta
+entry_point: workflows/annotate_twist_solid.yaml
+enabled: true
+
+parameters:
+  prev_pipeline:
+    description: Name of previously run analysis pipeline (only Twist Solid??) 
+    type: string
+    required: true
+  prev_analysis_id:
+    description: Cleve analysis-id of previously run analysis
+    type: string
+    required: true
+  prev_analysis_path:
+    description: Work directory of previous analysis
+    type: string
+    required: true
+    

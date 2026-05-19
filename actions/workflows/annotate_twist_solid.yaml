@@ -1,0 +1,195 @@
+
+version: 1.0
+
+description: Build Scout load config for a case, and load into scout and loqusdb. 
+
+input:
+  - prev_pipeline
+  - prev_analysis_id
+  - prev_analysis_path
+
+tasks:
+  get_sample_id:
+    action: core.local
+    input:
+      cmd: "" # How?
+      cwd: <% ctx().prev_analysis_path %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - sample_id: "sample" #TODO
+        do: get_old_analysis_output_files
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  get_old_analysis_output_files:
+    action: gmc_norr_analysis.get_pipeline_output_files
+    input:
+      pipeline: <% ctx().prev_pipeline %>
+      sample_id: <% ctx().sample_id %>
+      case_id: "temp" # needed?
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - twist_solid_files: "{{ result().result }}"
+        do: update_twist_solid_analysis_in_cleve
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  update_twist_solid_analysis_in_cleve:
+    action: cleve.update_analysis
+    input:
+      analysis_id: <% ctx().prev_analysis_id %>
+      output_files: <% ctx().twist_solid_files %>
+      state: "complete" 
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - scout_anno_workdir: <% ctx().prev_analysis_dir %>/scout_annotation
+        do: make_scout_annotation_work_dir
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  make_scout_annotation_work_dir:
+    action: core.local
+    input:
+      cmd:  "mkdir -p <% ctx().scout_anno_workdir %>"
+    next:
+      - when: <% succeeded() %>
+        do: make_scout_annotation_input
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  make_scout_annotation_input:
+    action: core.local
+    input:
+      cmd: "echo test" #TODO
+      cwd: <% ctx().scout_anno_workdir %>
+    next:
+      - when: <% succeeded() %>
+        do: add_scout_annotation_analysis_to_cleve
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  add_scout_annotation_analysis_to_cleve:
+    action: cleve.add_analysis
+    input:
+      input_files: <% ctx().twist_solid_files %> # analysis_id needs to be added?
+      path: <% ctx().scout_anno_workdir %>
+      software: <% ctx().pipeline %>
+      software_version: <% ctx().pipeline_version %>
+      run_id: "???" #How do I get this?
+      state: pending
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - plumber_analysis_id: <% result().result.body.analysis_id %>
+        do: get_plumber_arguments
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  get_plumber_arguments:
+    action: gmc_norr_analysis.get_plumber_arguments
+    input:
+       test_profile: <% ctx().test_profile %>
+    next:
+      - when: "{{ succeeded() }}"
+        publish:
+          - pipeline: <% result().result.Pipeline %>
+          - pipeline_version: <% result().result.Version %>
+          - pipeline_profile: <% result().result.Profile %>
+          - plumber_config_version: <% result().result.ConfigVersion %>
+        do: start_plumber
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  start_plumber:
+    action: core.remote
+    input:
+      cmd: "nohup plumber run <% ctx().pipeline %>
+        --version <% ctx().pipeline_version %> --config-version <% ctx().plumber_config_version %>
+        -p <% ctx().pipeline_profile %> --analysis-id <% ctx().plumber_analysis_id %> > plumber.log"
+      cwd: <% ctx().output_dir %>
+      hosts: <% ctx().plumber_host %>
+      timeout: 900
+    next:
+      - when: <% succeeded() %>
+        do: 
+          - get_scout_annotation_output_files
+      - when: <% failed() %>
+        publish:
+          - msg: <% result().values().first().stderr %>
+        do:
+          - report_failure
+
+  get_scout_annotation_output_files:
+    action: gmc_norr_analysis.get_pipeline_output_files
+    input:
+      pipeline: <% ctx().pipeline %>
+      sample_id: <% ctx().sample_id %>
+      case_id: <% ctx().case_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - scout_annot_files: "{{ result().result }}"
+        do: update_scout_annotation_analysis_in_cleve
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+
+  update_scout_annotation_analysis_in_cleve:
+    action: cleve.update_analysis
+    input:
+      state: "complete"
+      output_files: <% ctx().scout_annot_files %>
+    next:
+      - when: <% succeeded() %>
+        do: start_load_scout_workflow
+      - when: <% failed() %>
+        publish:
+          - msg: <% result() %>
+        do:
+          - report_failure
+  
+  start_load_scout_workflow:
+    action: scout.generate_and_load_case
+    input:
+      case_id: <% ctx().case_id %>
+      sample_ids:
+        - <% ctx().sample_id %>
+      pipeline: <% ctx().prev_pipeline %>
+      analysis_id: <% ctx().plumber_analysis_id %> # which one?
+      output_path: <% ctx().scout_anno_workdir %> # which one?
+
+  report_failure:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_ids %>"
+        message: <% ctx().msg %>
+    next:
+      - do: fail
