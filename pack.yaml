@@ -2,7 +2,7 @@
 ref: scout
 name: scout
 description: GMC Norr pack with actions for interacting with Scout
-version: 0.1.0 # x-release-please-version
+version: 1.0.0 # x-release-please-version
 python_versions:
   - "3"
 author: Niklas Mähler
