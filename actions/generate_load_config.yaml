@@ -71,3 +71,8 @@ parameters:
     required: true
     description: >
       List of igene panels for a sample. These are converted to Scout gene panels.
+
+  scout_specifics: 
+    type: object
+    required: true
+    description: Based on pipeline values to be filled in the scout load config. 

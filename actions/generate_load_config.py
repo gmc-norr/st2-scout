@@ -10,9 +10,6 @@ import logging
 
 log = logging.getLogger(__name__)
 
-PIPELINE_RD = "nf-core/raredisease"
-PIPELINE_CANCER = "genomic-medicine-sweden/Twist_Solid"
-
 class GenerateLoadConfigAction(Action):
     """Action for creating load configs for scout"""
 
@@ -26,9 +23,11 @@ class GenerateLoadConfigAction(Action):
         case_files: list,
         pipeline: str,
         igene_panels: list,
+        scout_specifics: dict
     ):
 
         try:
+            self.pipeline_specs = scout_specifics
 
             case_entry = self._case_entry(
                 case_files=case_files,
@@ -59,18 +58,28 @@ class GenerateLoadConfigAction(Action):
         return (default_panels, all_panels)
 
     def _scout_panel_from_igene_panel(self, igene_panel: str) -> str:
-        pat = re.compile(r"^(.+)_(PAN|SP)_WGS_v\.?\d+\.\d+$")
+
+        if pipeline
+        pat = re.compile(r"^(.+)_(PAN|SP)_(WGS|GMS560)_v\.?\d+\.\d+$")
         m = pat.match(igene_panel)
         if m is None:
             raise ValueError(f"unknown panel: {igene_panel}")
         scout_panel = m.group(1)
-        # Super-panels should include the suffix
-        if m.group(2) == "SP":
-            scout_panel += "_SP"
-        # Stupid special case
-        if scout_panel == "HTAD":
+
+        if m.group(3) == "GMS560":
             return scout_panel.lower()
-        return scout_panel
+
+        elif m.group(3) == "WGS":
+            # Super-panels should include the suffix
+            if m.group(2) == "SP":
+                scout_panel += "_SP"
+            # Stupid special case
+            if scout_panel == "HTAD":
+                return scout_panel.lower()
+            return scout_panel
+
+        else:
+            raise ValueError(f"Unknown panel {m.group(0)}")
 
     def _case_entry(
         self,
@@ -81,9 +90,9 @@ class GenerateLoadConfigAction(Action):
         panels: list,
     ) -> dict:
 
-        owner = self.config["owners_map"][pipeline]  # get from pack configuration
-        genome = self.config["genomes_map"][pipeline]
-        rank_model_url = self.config["rankmodel_map"][pipeline]
+        owner = self.pipeline_specs["owner"]
+        genome = self.pipeline_specs["genome"]
+        rank_model_url = self.pipeline_specs["rankmodel"]
         case_entry = {}
 
         if pipeline == PIPELINE_RD:
@@ -158,7 +167,7 @@ class GenerateLoadConfigAction(Action):
                 file_path = file["path"]
                 if not Path(file_path).exists():
                     raise FileNotFoundError(f"{file_path} does not exist")
-                for scout_key, file_suffix in self.config["scout_case_file_suffixes"].items():
+                for scout_key, file_suffix in self.pipeline_specs["scout_case_file_suffixes"].items():
                     if file_path.endswith(file_suffix):
                         parsed_files[scout_key] = file_path
                         break
@@ -167,9 +176,11 @@ class GenerateLoadConfigAction(Action):
             for file in files:
                 is_prefix = False
                 file_path = file["path"]
-                for _, file_prefix in self.config["scout_chromograph_file_prefixes"].items():
-                    if file_prefix in file_path:
-                        is_prefix = True
+
+                if "scout_chromograph_file_prefixes" in self.pipeline_specs:
+                    for _, file_prefix in self.pipeline_specs["scout_chromograph_file_prefixes"].items():
+                        if file_prefix in file_path:
+                            is_prefix = True
 
                 if not is_prefix:
                     if not Path(file_path).exists():

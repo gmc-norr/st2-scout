@@ -53,7 +53,15 @@ tasks:
           - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
 
-
+  get_scout_specifics:
+    action: scout.get_pipeline_specific_scout_values
+    input:
+      pipeline: <% ctx().pipeline %>
+    next:
+      - when: <% succeeded() %>
+        publish: 
+          - scout_specifics: <% result().result %>
+        do: generate_load_config
 
   generate_load_config:
     join: all
@@ -67,6 +75,7 @@ tasks:
       case_files: <% ctx().case_files %>
       pipeline: <% ctx().pipeline %>
       igene_panels: <% ctx().igene_panels %>
+      scout_specifics: <% ctx().scout_specifics %>
     next:
       - when: <% succeeded() %>
         publish:
