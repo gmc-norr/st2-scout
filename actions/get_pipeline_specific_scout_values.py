@@ -1,3 +1,7 @@
+from typing import Optional
+
+from st2common.runners.base_action import Action
+
 PIPELINE_RD = "nf-core/raredisease"
 PIPELINE_GMS = "genomic-medicine-sweden/Twist_Solid"
 
@@ -6,6 +10,8 @@ PIPELINE_TO_SCOUT_SPECIFICS = {
         "owner": "clingen-rd",
         "genome": "38",
         "rankmodel": "https://raw.githubusercontent.com/gmc-norr/config-files/main/rankmodels/rare_disease_rank_model_0.1.ini",
+        "analysis_type": "wgs",
+        "track": "rare",
         "scout_case_file_suffixes": {
             "vcf_snv": "_snv_ranked_clinical.vcf.gz",
             "vcf_snv_research": "_snv_ranked_research.vcf.gz",
@@ -27,12 +33,17 @@ PIPELINE_TO_SCOUT_SPECIFICS = {
     PIPELINE_GMS: {
         "owner": "clingen-solid",
         "genome": "37",
-        "rankmodel": "https://raw.githubusercontent.com/gmc-norr/config-files/main/rankmodels/cancer_rank_model_0.1.ini", #CHECK PATH TODO
+        "rankmodel": "https://raw.githubusercontent.com/gmc-norr/config-files/main/rankmodels/cancer_rank_model_0.1.ini",
+        "analysis_type": "panel",
+        "track": "cancer",
         "scout_case_file_suffixes": {
-
+            "vcf_cancer": ".annotated.genmod.vcf.gz",
+            "multiqc": ".general_report.html",
+            "cnv_report": ".pathology_purecn.cnv.html",
         },
         "scout_sample_file_suffixes": {
-
+            "alignment_path": ".bam",
+            "d4_file": ".coverage.d4",
         },
     } 
 }

@@ -59,7 +59,6 @@ class GenerateLoadConfigAction(Action):
 
     def _scout_panel_from_igene_panel(self, igene_panel: str) -> str:
 
-        if pipeline
         pat = re.compile(r"^(.+)_(PAN|SP)_(WGS|GMS560)_v\.?\d+\.\d+$")
         m = pat.match(igene_panel)
         if m is None:
@@ -93,37 +92,36 @@ class GenerateLoadConfigAction(Action):
         owner = self.pipeline_specs["owner"]
         genome = self.pipeline_specs["genome"]
         rank_model_url = self.pipeline_specs["rankmodel"]
+        track = self.pipeline_specs["track"]
         case_entry = {}
 
-        if pipeline == PIPELINE_RD:
-            scout_files = self._parse_files(case_files, level="case")
-            case_entry = {
-                "family": case_id,
-                "family_name": case_name if case_name is not None else case_id,
-                "human_genome_build": genome,
-                "rank_model_version": "0.1",
-                "owner": owner,
-                "rank_model_url": rank_model_url,
-            }
-            # Add case specific files
-            for scout_file, file in scout_files.items():
-                case_entry[scout_file] = file
-            # Get analysis date from multiqc
-            multiqc = scout_files.get("multiqc")
-            if multiqc is None:
-                analysis_date = datetime.now()
-            else:
-                info = os.stat(multiqc)
-                analysis_date = datetime.fromtimestamp(info.st_mtime)
-            case_entry["analysis_date"] = analysis_date
-            default_panels, all_panels = self._get_scout_panels(panels)
+        scout_files = self._parse_files(case_files, level="case")
+        case_entry = {
+            "family": case_id,
+            "family_name": case_name if case_name is not None else case_id,
+            "human_genome_build": genome,
+            "rank_model_version": "0.1",
+            "owner": owner,
+            "rank_model_url": rank_model_url,
+            "track": track
+        }
+        # Add case specific files
+        for scout_file, file in scout_files.items():
+            case_entry[scout_file] = file
+        # Get analysis date from multiqc
+        multiqc = scout_files.get("multiqc")
+        if multiqc is None:
+            analysis_date = datetime.now()
+        else:
+            info = os.stat(multiqc)
+            analysis_date = datetime.fromtimestamp(info.st_mtime)
+        case_entry["analysis_date"] = analysis_date
+        default_panels, all_panels = self._get_scout_panels(panels)
 
-            if len(all_panels) > 0:
-                case_entry["gene_panels"] = all_panels
-            if len(default_panels) > 0:
-                case_entry["default_gene_panels"] = default_panels
-
-        # TODO fix case_entry for gms-solid
+        if len(all_panels) > 0:
+            case_entry["gene_panels"] = all_panels
+        if len(default_panels) > 0:
+            case_entry["default_gene_panels"] = default_panels
 
         return case_entry
 
@@ -133,8 +131,9 @@ class GenerateLoadConfigAction(Action):
         for sample_id in sample_ids:
             parsed_files = self._parse_files(sample_files[sample_id], level="sample")
             sample_entry = {}
+            chromograph_prefixes = self.pipeline_specs.get("scout_chromograph_file_prefixes", {})
             for scout_name, file_path in parsed_files.items():
-                if scout_name in self.config["scout_chromograph_file_prefixes"]:
+                if scout_name in chromograph_prefixes:
                     if sample_entry.get("chromograph_images") is None:
                         sample_entry["chromograph_images"] = {}
                     sample_entry["chromograph_images"][scout_name] = file_path
@@ -144,7 +143,7 @@ class GenerateLoadConfigAction(Action):
             sample_entry["sample_id"] = sample_id
             sample_entry["sample_name"] = sample_id
             sample_entry["phenotype"] = "affected" #TODO change when running trios
-            sample_entry["analysis_type"] = "wgs" # TODO change when running gms-solid
+            sample_entry["analysis_type"] = self.pipeline_specs["analysis_type"]
             sample_entries.append(sample_entry)
         return sample_entries
 
@@ -185,7 +184,7 @@ class GenerateLoadConfigAction(Action):
                 if not is_prefix:
                     if not Path(file_path).exists():
                         raise FileNotFoundError(f"{file_path} does not exist")
-                    for scout_key, file_suffix in self.config["scout_sample_file_suffixes"].items():
+                    for scout_key, file_suffix in self.pipeline_specs["scout_sample_file_suffixes"].items():
                         if file_path.endswith(file_suffix):
                             parsed_files[scout_key] = file_path
                             break
@@ -194,7 +193,7 @@ class GenerateLoadConfigAction(Action):
                     for (
                         scout_key,
                         file_prefix,
-                    ) in self.config["scout_chromograph_file_prefixes"].items():
+                    ) in self.pipeline_specs["scout_chromograph_file_prefixes"].items():
                         if file_prefix in file_path:
                             parsed_files[scout_key] = (
                                 file_path.split(file_prefix)[0] + file_prefix
