@@ -107,7 +107,7 @@ tasks:
         do: generate_load_config
 
   generate_load_config:
-    join: all
+    join: 4
     action: scout.generate_load_config
     input:
       case_id: <% ctx().case_id %>
