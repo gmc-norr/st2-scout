@@ -24,11 +24,11 @@ tasks:
       parent_id: <% item(sample_id) %>
       level: sample
     next:
-      - when: <% succeeded() and ctx().pipeline == "nf-core/raredisease" %>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
-      - when: <% succeeded() and ctx().pipeline == "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
         publish:
           - primary_sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: get_secondary_sample_files 
@@ -40,11 +40,11 @@ tasks:
       level: case
       parent_id: <% ctx().case_id %>
     next:
-      - when: <% succeeded() and ctx().pipeline == "nf-core/raredisease" %>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - case_files: <% result().result.body %>
         do: generate_load_config
-      - when: <% succeeded() and ctx().pipeline == "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
         publish:
           - primary_case_files: <% result().result.body %>
         do: get_secondary_case_files
@@ -142,10 +142,10 @@ tasks:
     input:
       load_config: <% ctx().load_config_path %>
     next:
-      - when: <% succeeded() and ctx().pipeline == "nf-core/raredisease"%>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease"%>
         do: 
           - get_loqusdb_files
-      - when: <% succeeded() and ctx().pipeline == "genomic-medicine-sweden/Twist_Solid"%>
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid"%>
         publish:
           - success_message: "Variants and case loaded successfully into scout for case <% ctx().case_id %>, using the <% ctx().pipeline %> pipeline"
         do:

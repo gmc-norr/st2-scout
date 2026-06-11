@@ -87,7 +87,7 @@ class GenerateLoadConfigActionTestCase(BaseActionTestCase):
                 sample_info=sample_info,
                 case_files=case_files,
                 pipeline=pipeline,
-                igene_panels=["CARDIO_PAN_WGS_v1.0"],
+                igene_panels=["CARDIO_PAN_WGS_v1.0", "HTAD_PAN_WGS_v1.0"],
                 scout_specifics=PIPELINE_TO_SCOUT_SPECIFICS[pipeline]
             )
 
