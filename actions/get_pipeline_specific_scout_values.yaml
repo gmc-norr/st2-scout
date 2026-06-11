@@ -3,7 +3,7 @@ name: get_pipeline_specific_scout_values
 description: >
   based on pipeline run, get the correct generic entries for the scout load config
 runner_type: python-script
-entry_point: generate_pipeline_specific_scout_values.py
+entry_point: get_pipeline_specific_scout_values.py
 enabled: true
 
 parameters:
