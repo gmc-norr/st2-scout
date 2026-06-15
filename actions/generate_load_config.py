@@ -211,7 +211,7 @@ class GenerateLoadConfigAction(Action):
             if self.pipeline_specs.get("biomarker_file_suffixes") is None:
                 return None
             for file in case_files:
-                for key, value in self.pipeline_specs["biomarker_file_suffixes"]:
+                for key, value in self.pipeline_specs["biomarker_file_suffixes"].items():
                     if file.endswith("value"):
                         if not Path(file).exists():
                             raise FileNotFoundError(f"{file} does not exist")
@@ -219,13 +219,13 @@ class GenerateLoadConfigAction(Action):
 
             biomarkers = dict()
             if "tmb" in biomarker_files:
-                biomarkers["tmb"] = _parse_tmb(biomarker_files["tmb"])
+                biomarkers["tmb"] = self._parse_tmb(biomarker_files["tmb"])
 
             if "hrd" in biomarker_files:
-                biomarkers["hrd"] = _parse_hrd(biomarker_files["hrd"])
+                biomarkers["hrd"] = self._parse_hrd(biomarker_files["hrd"])
 
             if "msi" in biomarker_files:
-                biomarkers["msi"] = _parse_msi(biomarker_files["msi"])
+                biomarkers["msi"] = self._parse_msi(biomarker_files["msi"])
 
             return biomarkers
 
