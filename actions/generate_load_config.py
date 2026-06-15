@@ -213,6 +213,8 @@ class GenerateLoadConfigAction(Action):
             for file in case_files:
                 for key, value in self.pipeline_specs["biomarker_file_suffixes"]:
                     if file.endswith("value"):
+                        if not Path(file).exists():
+                            raise FileNotFoundError(f"{file} does not exist")
                         biomarker_files[key] = Path(file)
 
             biomarkers = dict()
