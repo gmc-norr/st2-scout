@@ -43,11 +43,13 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - case_files: <% result().result.body %>
-        do: generate_load_config
+        do: 
+          - generate_load_config
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
         publish:
           - primary_case_files: <% result().result.body %>
-        do: get_secondary_case_files
+        do: 
+          - get_secondary_case_files
 
   get_secondary_sample_files:
     with: sample_id in <% ctx().sample_ids %>
@@ -81,7 +83,8 @@ tasks:
       - when: <% succeeded() %>
         publish:
           - case_files: <% ctx().primary_case_files + result().result.body %> # Append with previous case_files
-        do: generate_load_config
+        do: 
+          - generate_load_config
 
   get_sample_info:
     with: sample_id in <% ctx().sample_ids %>

@@ -75,4 +75,5 @@ parameters:
   scout_specifics: 
     type: object
     required: true
-    description: Based on pipeline values to be filled in the scout load config. 
+    description: Based on pipeline values to be filled in the scout load config.
+

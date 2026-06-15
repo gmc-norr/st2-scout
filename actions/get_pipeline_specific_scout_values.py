@@ -45,6 +45,11 @@ PIPELINE_TO_SCOUT_SPECIFICS = {
             "alignment_path": ".bam",
             "d4_file": ".coverage.d4",
         },
+        "biomarker_file_suffixes": {
+            "hrd": "pathology_purecn.scarhrd_cnvkit_score.txt",
+            "msi": ".msisensor_pro.filtered.score.tsv",
+            "tmb": ".TMB.txt",
+        }
     } 
 }
 
