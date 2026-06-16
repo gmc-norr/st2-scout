@@ -206,64 +206,64 @@ class GenerateLoadConfigAction(Action):
 
         return parsed_files
 
-        def _get_biomarkers(self, case_files: list):
-            biomarker_files = dict()
-            if self.pipeline_specs.get("biomarker_file_suffixes") is None:
-                return None
-            for file in case_files:
-                for key, value in self.pipeline_specs["biomarker_file_suffixes"].items():
-                    if file.endswith("value"):
-                        if not Path(file).exists():
-                            raise FileNotFoundError(f"{file} does not exist")
-                        biomarker_files[key] = Path(file)
+    def _get_biomarkers(self, case_files: list):
+        biomarker_files = dict()
+        if self.pipeline_specs.get("biomarker_file_suffixes") is None:
+            return None
+        for file in case_files:
+            file_path = file["path"]
+            for key, value in self.pipeline_specs["biomarker_file_suffixes"].items():
+                if file_path.endswith(value):
+                    if not Path(file_path).exists():
+                        raise FileNotFoundError(f"{file_path} does not exist")
+                    biomarker_files[key] = Path(file_path)
 
-            biomarkers = dict()
-            if "tmb" in biomarker_files:
-                biomarkers["tmb"] = self._parse_tmb(biomarker_files["tmb"])
+        biomarkers = dict()
+        if "tmb" in biomarker_files:
+            biomarkers["tmb"] = self._parse_tmb(biomarker_files["tmb"])
 
-            if "hrd" in biomarker_files:
-                biomarkers["hrd"] = self._parse_hrd(biomarker_files["hrd"])
+        if "hrd" in biomarker_files:
+            biomarkers["hrd"] = self._parse_hrd(biomarker_files["hrd"])
 
-            if "msi" in biomarker_files:
-                biomarkers["msi"] = self._parse_msi(biomarker_files["msi"])
+        if "msi" in biomarker_files:
+            biomarkers["msi"] = self._parse_msi(biomarker_files["msi"])
 
-            return biomarkers
+        return biomarkers
 
-        def _get_hrd(self, hrd_file: Path):
-            """
-            Reads HRD file with two lines
-            - header line ('HRD-score HRD Telomeric_AI LST')
-            - values
-            Returns the first column (HRD-score) as an int.
-            """
-            with open(hrd_file, "r") as f:
-                header = f.readline().strip().split()
-                values = f.readline().strip().split()
-            hrd_data = dict(zip(header, values))
-            return str(int(hrd_data["HRD-score"]))
+    def _parse_hrd(self, hrd_file: Path):
+        """
+        Reads HRD file with two lines
+        - header line ('HRD-score HRD Telomeric_AI LST')
+        - values
+        Returns the first column (HRD-score) as an int.
+        """
+        with open(hrd_file, "r") as f:
+            header = f.readline().strip().split()
+            values = f.readline().strip().split()
+        hrd_data = dict(zip(header, values))
+        return str(int(hrd_data["HRD-score"]))
 
-        def _parse_tmb(self, tmb_file: Path):
-            """
-            Reads TMB file from gms-solid where first line looks like
-            'TMB:   <tmb-value>'
-            and returns the numeric TMB as a float
-            """
-            with open(tmb_file, "r") as f:
-                tmb_line = f.readline().strip()
-            tmb_value = tmb_line.split(':')[1].strip()
-            return str(float(tmb_value))
+    def _parse_tmb(self, tmb_file: Path):
+        """
+        Reads TMB file from gms-solid where first line looks like
+        'TMB:   <tmb-value>'
+        and returns the numeric TMB as a float
+        """
+        with open(tmb_file, "r") as f:
+            tmb_line = f.readline().strip()
+        tmb_value = tmb_line.split(':')[1].strip()
+        return str(float(tmb_value))
 
-        def _get_msi(self, msi_file: Path):
-            """
-            Parse a MSI file with header and a single line of values
-            - header line: 'Total_Number_of_Sites   Number_of_Somatic_Sites %'
-            - values
-            Returns the MSI percentage under '%' as a float
-            """
-            with open(msi_file, "r") as f:
+    def _parse_msi(self, msi_file: Path):
+        """
+        Parse a MSI file with header and a single line of values
+        - header line: 'Total_Number_of_Sites   Number_of_Somatic_Sites %'
+        - values
+        Returns the MSI percentage under '%' as a float
+        """
+        with open(msi_file, "r") as f:
+            header = f.readline().strip().split()
+            values = f.readline().strip().split()
 
-                header = f.readline().strip().split()
-                values = f.readline().strip().split()
-
-            data = dict(zip(header, values))
-            return str(float(data["%"]))
+        data = dict(zip(header, values))
+        return str(float(data["%"]))
