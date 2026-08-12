@@ -12,6 +12,7 @@ PIPELINE_TO_SCOUT_SPECIFICS = {
         "rankmodel": "https://raw.githubusercontent.com/gmc-norr/config-files/main/rankmodels/rare_disease_rank_model_0.1.ini",
         "analysis_type": "wgs",
         "track": "rare",
+        "global_panels": ("PANELAPP-GREEN", ),
         "scout_case_file_suffixes": {
             "vcf_snv": "_snv_ranked_clinical.vcf.gz",
             "vcf_snv_research": "_snv_ranked_research.vcf.gz",
@@ -36,6 +37,7 @@ PIPELINE_TO_SCOUT_SPECIFICS = {
         "rankmodel": "https://raw.githubusercontent.com/gmc-norr/config-files/main/rankmodels/cancer_rank_model_0.1.ini",
         "analysis_type": "panel",
         "track": "cancer",
+        "global_panels": ("PANELAPP-GREEN", "gms560_all_genes"),
         "scout_case_file_suffixes": {
             "vcf_cancer": ".annotated.genmod.vcf.gz",
             "multiqc": ".general_report.html",

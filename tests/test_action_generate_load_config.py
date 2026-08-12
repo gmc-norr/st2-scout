@@ -100,6 +100,7 @@ class GenerateLoadConfigActionTestCase(BaseActionTestCase):
             self.assertEqual(result["human_genome_build"], "38")
             self.assertIn("analysis_date", result)
             self.assertIn("gene_panels", result)
+            self.assertIn("PANELAPP-GREEN", result["gene_panels"])
             self.assertIn("default_gene_panels", result)
 
             # --- sample-level assertions ---
@@ -153,6 +154,8 @@ class GenerateLoadConfigActionTestCase(BaseActionTestCase):
             self.assertEqual(result["human_genome_build"], "37")
             self.assertIn("analysis_date", result)
             self.assertIn("gene_panels", result)
+            self.assertIn("PANELAPP-GREEN", result["gene_panels"])
+            self.assertIn("gms560_all_genes", result["gene_panels"])
             self.assertEqual(result["default_gene_panels"], ["cancer"])
 
             # --- sample-level assertions ---

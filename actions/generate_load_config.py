@@ -44,7 +44,7 @@ class GenerateLoadConfigAction(Action):
         except Exception as e:
             return (False, {"error": str(e)})
 
-    def _get_scout_panels(self, panels: list) -> tuple:
+    def _get_scout_panels(self, panels: list, global_panels: tuple) -> tuple:
         default_panels = []
         for p in panels:
             if p == "SNV_WGS":
@@ -53,7 +53,7 @@ class GenerateLoadConfigAction(Action):
             log.info(f"using scout panel {default_panels[-1]} (iGene panel {p})")
 
         default_panels = list(set(default_panels))
-        all_panels = default_panels + ["PANELAPP-GREEN"]
+        all_panels = default_panels + global_panels
 
         return (default_panels, all_panels)
 
@@ -116,7 +116,7 @@ class GenerateLoadConfigAction(Action):
             info = os.stat(multiqc)
             analysis_date = datetime.fromtimestamp(info.st_mtime)
         case_entry["analysis_date"] = analysis_date
-        default_panels, all_panels = self._get_scout_panels(panels)
+        default_panels, all_panels = self._get_scout_panels(panels, self.pipeline_specs.get("global_panels", tuple()))
 
         if len(all_panels) > 0:
             case_entry["gene_panels"] = all_panels
