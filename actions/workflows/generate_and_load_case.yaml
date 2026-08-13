@@ -31,7 +31,11 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
         publish:
           - primary_sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
-        do: get_secondary_sample_files 
+        do: get_secondary_sample_files
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id = null %>
+        publish:
+          - msg: "Case <% ctx().case_id %> and samples <% ctx().sample_ids %> have no secondary analysis"
+        do: report_failure
 
   get_case_files:
     action: cleve.get_analysis_files
