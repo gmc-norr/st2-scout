@@ -53,7 +53,7 @@ class GenerateLoadConfigAction(Action):
             log.info(f"using scout panel {default_panels[-1]} (iGene panel {p})")
 
         default_panels = list(set(default_panels))
-        all_panels = default_panels + global_panels
+        all_panels = default_panels + list(global_panels)
 
         return (default_panels, all_panels)
 
