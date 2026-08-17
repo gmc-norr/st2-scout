@@ -38,6 +38,7 @@ PIPELINE_TO_SCOUT_SPECIFICS = {
         "analysis_type": "panel",
         "track": "cancer",
         "global_panels": ("PANELAPP-GREEN", "gms560_all_genes"),
+        "rank_score_threshold": "-1000",
         "scout_case_file_suffixes": {
             "vcf_cancer": ".annotated.genmod.vcf.gz",
             "multiqc": ".general_report.html",

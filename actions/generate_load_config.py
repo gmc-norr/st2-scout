@@ -93,6 +93,7 @@ class GenerateLoadConfigAction(Action):
         genome = self.pipeline_specs["genome"]
         rank_model_url = self.pipeline_specs["rankmodel"]
         track = self.pipeline_specs["track"]
+        rank_score_threshold = self.pipeline_specs.get("rank_score_threshold")
         case_entry = {}
 
         scout_files = self._parse_files(case_files, level="case")
@@ -105,6 +106,10 @@ class GenerateLoadConfigAction(Action):
             "rank_model_url": rank_model_url,
             "track": track
         }
+
+        if rank_score_threshold is not None:
+            case_entry["rank_score_threshold"] = rank_score_threshold
+
         # Add case specific files
         for scout_file, file in scout_files.items():
             case_entry[scout_file] = file
@@ -122,11 +127,6 @@ class GenerateLoadConfigAction(Action):
             case_entry["gene_panels"] = all_panels
         if len(default_panels) > 0:
             case_entry["default_gene_panels"] = default_panels
-
-        if self.pipeline_specs.get("biomarker_file_suffixes") is not None:
-            biomarkers = self._get_biomarkers(case_files)
-            for key, value in biomarkers.items():
-                case_entry[key] = value
 
         return case_entry
 
@@ -149,6 +149,10 @@ class GenerateLoadConfigAction(Action):
             sample_entry["sample_name"] = sample_id
             sample_entry["phenotype"] = "affected" #TODO change when running trios
             sample_entry["analysis_type"] = self.pipeline_specs["analysis_type"]
+            if self.pipeline_specs.get("biomarker_file_suffixes") is not None:
+                biomarkers = self._get_biomarkers(sample_files[sample_id])
+                for key, value in biomarkers.items():
+                    sample_entry[key] = value
             sample_entries.append(sample_entry)
         return sample_entries
 
