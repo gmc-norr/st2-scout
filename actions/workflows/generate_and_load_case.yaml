@@ -8,6 +8,7 @@ input:
   - sample_ids
   - pipeline
   - analysis_id
+  - secondary_analysis_id
   - output_path
 
 output:
@@ -23,10 +24,18 @@ tasks:
       parent_id: <% item(sample_id) %>
       level: sample
     next:
-      - when: <% succeeded() %>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
+        publish:
+          - primary_sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
+        do: get_secondary_sample_files
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id = null %>
+        publish:
+          - msg: "Case <% ctx().case_id %> and samples <% ctx().sample_ids %> have no secondary analysis"
+        do: report_failure
 
   get_case_files:
     action: cleve.get_analysis_files
@@ -35,10 +44,51 @@ tasks:
       level: case
       parent_id: <% ctx().case_id %>
     next:
-      - when: <% succeeded() %>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - case_files: <% result().result.body %>
-        do: generate_load_config
+        do: 
+          - generate_load_config
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
+        publish:
+          - primary_case_files: <% result().result.body %>
+        do: 
+          - get_secondary_case_files
+
+  get_secondary_sample_files:
+    with: sample_id in <% ctx().sample_ids %>
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().secondary_analysis_id %>
+      parent_id: <% item(sample_id) %>
+      level: sample
+    next: 
+      - when: <% succeeded() %>
+        publish:
+          - secondary_sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
+        do: concatenate_sample_files
+
+  concatenate_sample_files:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - sample_files: <% dict(zip(ctx().sample_ids, ctx().sample_ids.select(ctx().primary_sample_files.get($) + ctx().secondary_sample_files.get($)))) %>
+        do: 
+          - generate_load_config
+
+  get_secondary_case_files:
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().secondary_analysis_id %>
+      level: case
+      parent_id: <% ctx().case_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - case_files: <% ctx().primary_case_files + result().result.body %> # Append with previous case_files
+        do: 
+          - generate_load_config
 
   get_sample_info:
     with: sample_id in <% ctx().sample_ids %>
@@ -46,17 +96,31 @@ tasks:
     input:
       sample_id: <% item(sample_id) %>
     next:
-      - when: <% succeeded() %>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - igene_panels: <% result().first().result.body.Panels %>
           - case_name: <% result().first().result.body.ParentSampleID %>
           - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" %>
+        publish:
+          - igene_panels: <% result().first().result.body.Panels %>
+          - case_name: <% ctx().sample_ids.first() %>
+          - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
+        do: generate_load_config
 
-
+  get_scout_specifics:
+    action: scout.get_pipeline_specific_scout_values
+    input:
+      pipeline: <% ctx().pipeline %>
+    next:
+      - when: <% succeeded() %>
+        publish: 
+          - scout_specifics: <% result().result %>
+        do: generate_load_config
 
   generate_load_config:
-    join: all
+    join: 4
     action: scout.generate_load_config
     input:
       case_id: <% ctx().case_id %>
@@ -67,6 +131,7 @@ tasks:
       case_files: <% ctx().case_files %>
       pipeline: <% ctx().pipeline %>
       igene_panels: <% ctx().igene_panels %>
+      scout_specifics: <% ctx().scout_specifics %>
     next:
       - when: <% succeeded() %>
         publish:
@@ -90,9 +155,14 @@ tasks:
     input:
       load_config: <% ctx().load_config_path %>
     next:
-      - when: <% succeeded() %>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease"%>
         do: 
           - get_loqusdb_files
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid"%>
+        publish:
+          - success_message: "Variants and case loaded successfully into scout for case <% ctx().case_id %>, using the <% ctx().pipeline %> pipeline"
+        do:
+          - report_success
       - when: <% failed() %>
         publish:
           - msg: <% result().values().first().stderr %>
@@ -121,6 +191,8 @@ tasks:
       config_file: <% ctx().loqusdb_config %>
     next:
       - when: <% succeeded() %>
+        publish:
+          - success_message: "Variants and case loaded successfully into scout and loqusdb for case <% ctx().case_id %>, using the <% ctx().pipeline %> pipeline"
         do:
           - report_success
       - when: <% failed() %>
@@ -145,4 +217,4 @@ tasks:
       trigger_name: gmc_norr_analysis.email_notification
       payload:
         subject: "Case <% ctx().case_id %> and samples <% ctx().sample_ids %> loaded to scout and loqusdb "
-        message: "case and samples successfully loaded"
+        message: <% ctx().success_message %>

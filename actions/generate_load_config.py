@@ -10,9 +10,6 @@ import logging
 
 log = logging.getLogger(__name__)
 
-PIPELINE_RD = "nf-core/raredisease"
-PIPELINE_CANCER = "genomic-medicine-sweden/Twist_Solid"
-
 class GenerateLoadConfigAction(Action):
     """Action for creating load configs for scout"""
 
@@ -26,9 +23,11 @@ class GenerateLoadConfigAction(Action):
         case_files: list,
         pipeline: str,
         igene_panels: list,
+        scout_specifics: dict,
     ):
 
         try:
+            self.pipeline_specs = scout_specifics
 
             case_entry = self._case_entry(
                 case_files=case_files,
@@ -45,7 +44,7 @@ class GenerateLoadConfigAction(Action):
         except Exception as e:
             return (False, {"error": str(e)})
 
-    def _get_scout_panels(self, panels: list) -> tuple:
+    def _get_scout_panels(self, panels: list, global_panels: tuple) -> tuple:
         default_panels = []
         for p in panels:
             if p == "SNV_WGS":
@@ -54,23 +53,32 @@ class GenerateLoadConfigAction(Action):
             log.info(f"using scout panel {default_panels[-1]} (iGene panel {p})")
 
         default_panels = list(set(default_panels))
-        all_panels = default_panels + ["PANELAPP-GREEN"]
+        all_panels = default_panels + list(global_panels)
 
         return (default_panels, all_panels)
 
     def _scout_panel_from_igene_panel(self, igene_panel: str) -> str:
-        pat = re.compile(r"^(.+)_(PAN|SP)_WGS_v\.?\d+\.\d+$")
+
+        pat = re.compile(r"^(.+)_(PAN|SP)_(WGS|GMS560)_v\.?\d+\.\d+$")
         m = pat.match(igene_panel)
         if m is None:
             raise ValueError(f"unknown panel: {igene_panel}")
         scout_panel = m.group(1)
-        # Super-panels should include the suffix
-        if m.group(2) == "SP":
-            scout_panel += "_SP"
-        # Stupid special case
-        if scout_panel == "HTAD":
+
+        if m.group(3) == "GMS560":
             return scout_panel.lower()
-        return scout_panel
+
+        elif m.group(3) == "WGS":
+            # Super-panels should include the suffix
+            if m.group(2) == "SP":
+                scout_panel += "_SP"
+            # Stupid special case
+            if scout_panel == "HTAD":
+                return scout_panel.lower()
+            return scout_panel
+
+        else:
+            raise ValueError(f"Unknown panel {m.group(0)}")
 
     def _case_entry(
         self,
@@ -81,40 +89,44 @@ class GenerateLoadConfigAction(Action):
         panels: list,
     ) -> dict:
 
-        owner = self.config["owners_map"][pipeline]  # get from pack configuration
-        genome = self.config["genomes_map"][pipeline]
-        rank_model_url = self.config["rankmodel_map"][pipeline]
+        owner = self.pipeline_specs["owner"]
+        genome = self.pipeline_specs["genome"]
+        rank_model_url = self.pipeline_specs["rankmodel"]
+        track = self.pipeline_specs["track"]
+        rank_score_threshold = self.pipeline_specs.get("rank_score_threshold")
         case_entry = {}
 
-        if pipeline == PIPELINE_RD:
-            scout_files = self._parse_files(case_files, level="case")
-            case_entry = {
-                "family": case_id,
-                "family_name": case_name if case_name is not None else case_id,
-                "human_genome_build": genome,
-                "rank_model_version": "0.1",
-                "owner": owner,
-                "rank_model_url": rank_model_url,
-            }
-            # Add case specific files
-            for scout_file, file in scout_files.items():
-                case_entry[scout_file] = file
-            # Get analysis date from multiqc
-            multiqc = scout_files.get("multiqc")
-            if multiqc is None:
-                analysis_date = datetime.now()
-            else:
-                info = os.stat(multiqc)
-                analysis_date = datetime.fromtimestamp(info.st_mtime)
-            case_entry["analysis_date"] = analysis_date
-            default_panels, all_panels = self._get_scout_panels(panels)
+        scout_files = self._parse_files(case_files, level="case")
+        case_entry = {
+            "family": case_id,
+            "family_name": case_name if case_name is not None else case_id,
+            "human_genome_build": genome,
+            "rank_model_version": "0.1",
+            "owner": owner,
+            "rank_model_url": rank_model_url,
+            "track": track
+        }
 
-            if len(all_panels) > 0:
-                case_entry["gene_panels"] = all_panels
-            if len(default_panels) > 0:
-                case_entry["default_gene_panels"] = default_panels
+        if rank_score_threshold is not None:
+            case_entry["rank_score_threshold"] = rank_score_threshold
 
-        # TODO fix case_entry for gms-solid
+        # Add case specific files
+        for scout_file, file in scout_files.items():
+            case_entry[scout_file] = file
+        # Get analysis date from multiqc
+        multiqc = scout_files.get("multiqc")
+        if multiqc is None:
+            analysis_date = datetime.now()
+        else:
+            info = os.stat(multiqc)
+            analysis_date = datetime.fromtimestamp(info.st_mtime)
+        case_entry["analysis_date"] = analysis_date
+        default_panels, all_panels = self._get_scout_panels(panels, self.pipeline_specs.get("global_panels", tuple()))
+
+        if len(all_panels) > 0:
+            case_entry["gene_panels"] = all_panels
+        if len(default_panels) > 0:
+            case_entry["default_gene_panels"] = default_panels
 
         return case_entry
 
@@ -124,8 +136,9 @@ class GenerateLoadConfigAction(Action):
         for sample_id in sample_ids:
             parsed_files = self._parse_files(sample_files[sample_id], level="sample")
             sample_entry = {}
+            chromograph_prefixes = self.pipeline_specs.get("scout_chromograph_file_prefixes", {})
             for scout_name, file_path in parsed_files.items():
-                if scout_name in self.config["scout_chromograph_file_prefixes"]:
+                if scout_name in chromograph_prefixes:
                     if sample_entry.get("chromograph_images") is None:
                         sample_entry["chromograph_images"] = {}
                     sample_entry["chromograph_images"][scout_name] = file_path
@@ -135,7 +148,11 @@ class GenerateLoadConfigAction(Action):
             sample_entry["sample_id"] = sample_id
             sample_entry["sample_name"] = sample_id
             sample_entry["phenotype"] = "affected" #TODO change when running trios
-            sample_entry["analysis_type"] = "wgs" # TODO change when running gms-solid
+            sample_entry["analysis_type"] = self.pipeline_specs["analysis_type"]
+            if self.pipeline_specs.get("biomarker_file_suffixes") is not None:
+                biomarkers = self._get_biomarkers(sample_files[sample_id])
+                for key, value in biomarkers.items():
+                    sample_entry[key] = value
             sample_entries.append(sample_entry)
         return sample_entries
 
@@ -158,7 +175,7 @@ class GenerateLoadConfigAction(Action):
                 file_path = file["path"]
                 if not Path(file_path).exists():
                     raise FileNotFoundError(f"{file_path} does not exist")
-                for scout_key, file_suffix in self.config["scout_case_file_suffixes"].items():
+                for scout_key, file_suffix in self.pipeline_specs["scout_case_file_suffixes"].items():
                     if file_path.endswith(file_suffix):
                         parsed_files[scout_key] = file_path
                         break
@@ -167,14 +184,16 @@ class GenerateLoadConfigAction(Action):
             for file in files:
                 is_prefix = False
                 file_path = file["path"]
-                for _, file_prefix in self.config["scout_chromograph_file_prefixes"].items():
-                    if file_prefix in file_path:
-                        is_prefix = True
+
+                if "scout_chromograph_file_prefixes" in self.pipeline_specs:
+                    for _, file_prefix in self.pipeline_specs["scout_chromograph_file_prefixes"].items():
+                        if file_prefix in file_path:
+                            is_prefix = True
 
                 if not is_prefix:
                     if not Path(file_path).exists():
                         raise FileNotFoundError(f"{file_path} does not exist")
-                    for scout_key, file_suffix in self.config["scout_sample_file_suffixes"].items():
+                    for scout_key, file_suffix in self.pipeline_specs["scout_sample_file_suffixes"].items():
                         if file_path.endswith(file_suffix):
                             parsed_files[scout_key] = file_path
                             break
@@ -183,10 +202,72 @@ class GenerateLoadConfigAction(Action):
                     for (
                         scout_key,
                         file_prefix,
-                    ) in self.config["scout_chromograph_file_prefixes"].items():
+                    ) in self.pipeline_specs["scout_chromograph_file_prefixes"].items():
                         if file_prefix in file_path:
                             parsed_files[scout_key] = (
                                 file_path.split(file_prefix)[0] + file_prefix
                             )
 
         return parsed_files
+
+    def _get_biomarkers(self, case_files: list):
+        biomarker_files = dict()
+        if self.pipeline_specs.get("biomarker_file_suffixes") is None:
+            return None
+        for file in case_files:
+            file_path = file["path"]
+            for key, value in self.pipeline_specs["biomarker_file_suffixes"].items():
+                if file_path.endswith(value):
+                    if not Path(file_path).exists():
+                        raise FileNotFoundError(f"{file_path} does not exist")
+                    biomarker_files[key] = Path(file_path)
+
+        biomarkers = dict()
+        if "tmb" in biomarker_files:
+            biomarkers["tmb"] = self._parse_tmb(biomarker_files["tmb"])
+
+        if "hrd" in biomarker_files:
+            biomarkers["hrd"] = self._parse_hrd(biomarker_files["hrd"])
+
+        if "msi" in biomarker_files:
+            biomarkers["msi"] = self._parse_msi(biomarker_files["msi"])
+
+        return biomarkers
+
+    def _parse_hrd(self, hrd_file: Path):
+        """
+        Reads HRD file with two lines
+        - header line ('HRD-score HRD Telomeric_AI LST')
+        - values
+        Returns the first column (HRD-score) as an int.
+        """
+        with open(hrd_file, "r") as f:
+            header = f.readline().strip().split()
+            values = f.readline().strip().split()
+        hrd_data = dict(zip(header, values))
+        return str(int(hrd_data["HRD-score"]))
+
+    def _parse_tmb(self, tmb_file: Path):
+        """
+        Reads TMB file from gms-solid where first line looks like
+        'TMB:   <tmb-value>'
+        and returns the numeric TMB as a float
+        """
+        with open(tmb_file, "r") as f:
+            tmb_line = f.readline().strip()
+        tmb_value = tmb_line.split(':')[1].strip()
+        return str(float(tmb_value))
+
+    def _parse_msi(self, msi_file: Path):
+        """
+        Parse a MSI file with header and a single line of values
+        - header line: 'Total_Number_of_Sites   Number_of_Somatic_Sites %'
+        - values
+        Returns the MSI percentage under '%' as a float
+        """
+        with open(msi_file, "r") as f:
+            header = f.readline().strip().split()
+            values = f.readline().strip().split()
+
+        data = dict(zip(header, values))
+        return str(float(data["%"]))
