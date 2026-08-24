@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/gmc-norr/st2-scout/compare/v1.0.0...v2.0.0) (2026-08-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* Support for gms_solid analysis ([#11](https://github.com/gmc-norr/st2-scout/issues/11))
+
+### Features
+
+* Support for gms_solid analysis ([#11](https://github.com/gmc-norr/st2-scout/issues/11)) ([13ad6ed](https://github.com/gmc-norr/st2-scout/commit/13ad6ed06dd996cd8f08a441cc7cbfe81a295512))
+
 ## 1.0.0 (2026-05-08)
 
 
