@@ -1,4 +1,4 @@
-# StackStorm pack with actions for interacting with Scout
+# StackStorm pack with actions for interacting with Scout and other scout related services
 
 ## Installation
 
