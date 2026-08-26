@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.1](https://github.com/gmc-norr/st2-scout/compare/v2.0.0...v2.0.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* update readme ([b14f9ec](https://github.com/gmc-norr/st2-scout/commit/b14f9ecae641ff2fafe6efde67863e00af583cf1))
+* update readme ([#14](https://github.com/gmc-norr/st2-scout/issues/14)) ([b14f9ec](https://github.com/gmc-norr/st2-scout/commit/b14f9ecae641ff2fafe6efde67863e00af583cf1))
+
 ## [2.0.0](https://github.com/gmc-norr/st2-scout/compare/v1.0.0...v2.0.0) (2026-08-21)
 
 
