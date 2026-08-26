@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.2](https://github.com/gmc-norr/st2-scout/compare/v2.0.1...v2.0.2) (2026-08-26)
+
+
+### Bug Fixes
+
+* remove empty action files ([#16](https://github.com/gmc-norr/st2-scout/issues/16)) ([15d9c70](https://github.com/gmc-norr/st2-scout/commit/15d9c709f79aecdd58f85b9f91c306d216fb4524))
+* remove empty files ([15d9c70](https://github.com/gmc-norr/st2-scout/commit/15d9c709f79aecdd58f85b9f91c306d216fb4524))
+
 ## [2.0.1](https://github.com/gmc-norr/st2-scout/compare/v2.0.0...v2.0.1) (2026-08-26)
 
 
