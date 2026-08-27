@@ -105,7 +105,7 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" %>
         publish:
           - igene_panels: <% result().first().result.body.Panels %>
-          - case_name: <% ctx().sample_ids.first() %>
+          - case_name: "<% ctx().sample_ids.first() %>_<% result().first().result.body.ExternalRID %>"
           - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
 
