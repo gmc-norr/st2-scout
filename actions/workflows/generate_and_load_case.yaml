@@ -165,7 +165,7 @@ tasks:
           - report_success
       - when: <% failed() %>
         publish:
-          - msg: <% result().values().first().stderr %>
+          - msg: "{{ result() | to_json_string }}"
         do:
           - report_failure
 
