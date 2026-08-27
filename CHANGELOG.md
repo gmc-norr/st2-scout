@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/gmc-norr/st2-scout/compare/v2.0.3...v2.1.0) (2026-08-27)
+
+
+### Features
+
+* use sample_name and ExternalRID for a sample as a unique case_name in scout. For gms-solid ([#20](https://github.com/gmc-norr/st2-scout/issues/20)) ([d0056ab](https://github.com/gmc-norr/st2-scout/commit/d0056abf182842b531d22db48311a467e0538e1e))
+
 ## [2.0.3](https://github.com/gmc-norr/st2-scout/compare/v2.0.2...v2.0.3) (2026-08-27)
 
 
