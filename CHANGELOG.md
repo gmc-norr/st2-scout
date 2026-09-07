@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.1](https://github.com/gmc-norr/st2-scout/compare/v2.1.0...v2.1.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* ignore SNV_konst_GMS560 panel ([#23](https://github.com/gmc-norr/st2-scout/issues/23)) ([2ea6ee4](https://github.com/gmc-norr/st2-scout/commit/2ea6ee48c53272839b3b30d3466a4a99cc0bb26d))
+* more failure checks in `generate and load case` workflow ([#22](https://github.com/gmc-norr/st2-scout/issues/22)) ([d15b018](https://github.com/gmc-norr/st2-scout/commit/d15b018808fa419e53bd478b825e70241ff42442))
+
 ## [2.1.0](https://github.com/gmc-norr/st2-scout/compare/v2.0.3...v2.1.0) (2026-08-27)
 
 
