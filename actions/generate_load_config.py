@@ -47,7 +47,7 @@ class GenerateLoadConfigAction(Action):
     def _get_scout_panels(self, panels: list, global_panels: tuple) -> tuple:
         default_panels = []
         for p in panels:
-            if p == "SNV_WGS" or p == "CustomSolid_PAN_GMS560" or p == "SNV_konst_GMS560":
+            if p in ["SNV_WGS", "CustomSolid_PAN_GMS560", "SNV_konst_GMS560", "VerifKonst_PAN_GMS560"]:
                 continue
             default_panels.append(self._scout_panel_from_igene_panel(p))
             log.info(f"using scout panel {default_panels[-1]} (iGene panel {p})")
