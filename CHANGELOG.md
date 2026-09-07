@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/gmc-norr/st2-scout/compare/v2.1.1...v2.1.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* ignore VerifKonst_PAN_GMS560 panel ([#25](https://github.com/gmc-norr/st2-scout/issues/25)) ([47f0040](https://github.com/gmc-norr/st2-scout/commit/47f00400b930f9c22acf4481ba804ef3df32e6f2))
+
 ## [2.1.1](https://github.com/gmc-norr/st2-scout/compare/v2.1.0...v2.1.1) (2026-09-07)
 
 
