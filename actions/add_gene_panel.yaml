@@ -8,7 +8,7 @@ enabled: true
 
 parameters:
   gene_panel_id:
-    description: ID of the gene panel from iGene
+    description: Code of the gene panel from iGene, i.e., X_PAN_WGS_v.Y.0 or X_PAN_GMS560_v.Y.0
     type: string
     required: true
   scout_institute:
@@ -16,5 +16,5 @@ parameters:
     type: string
     required: true
   output_path:
-    description: Direcotry to save gene panel text file
+    description: Directory to save gene panel text file
     default:  "{{ config_context.gene_panel_dir }}"
