@@ -23,3 +23,8 @@ loqusdb_vcf:
   description: subdir and suffix for vcf file to be used by loqusdb
   type: object
   required: true
+
+gene_panel_dir:
+  description: directory where gene panel text files are saved
+  type: string
+  required: true
