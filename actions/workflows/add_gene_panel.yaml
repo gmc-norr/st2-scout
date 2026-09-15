@@ -29,10 +29,11 @@ tasks:
     input:
       cmd: date +%F
     next:
-      publish:
-        - date: <% result.stdout() %>
-      do:
-        write_file_beginning
+      - when: <% succeeded() %>
+        publish:
+          - date: <% result.stdout() %>
+        do:
+          write_file_beginning
 
   write_file_beginning:
     action: core.local
