@@ -46,7 +46,7 @@ tasks:
   write_genes:
     action: core.local
     input:
-      cmd: echo -e "#hgnc_id\thgnc_symbol\n{% for gene in genes%}{{ gene.hgnc.split(':')[1] + '\t' + gene.symbol + '\n' }}{% endfor %}" >> <% ctx().gene_panel_file %>
+      cmd: echo -e "#hgnc_id\thgnc_symbol\n{% for gene in genes%}{{ gene.hgnc.split(':')[1] + '\t' + gene.symbol + '\n' }}{% endfor %}" >> "{{ ctx().gene_panel_file }}"
     next:
       - when: <% succeeded() %>
         do: load_panel
@@ -54,5 +54,5 @@ tasks:
   load_panel:
     action: scout.load_gene_panel
     input:
-      load_config: <% ctx().gene_panel_file %>
+      gene_panel_file: <% ctx().gene_panel_file %>
 
