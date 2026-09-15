@@ -3,7 +3,7 @@ name: add_gene_panel
 pack: scout
 description: Add gene panel to scout
 runner_type: orquesta
-entry_point: workflows/.yaml
+entry_point: workflows/add_gene_panel.yaml
 enabled: true
 
 parameters:
