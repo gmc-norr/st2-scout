@@ -11,7 +11,7 @@ parameters:
     description: Code of the gene panel from iGene, i.e., X_PAN_WGS_v.Y.0 or X_PAN_GMS560_v.Y.0
     type: string
     required: true
-  scout_institute:
+  institute:
     description: Which institute in Scout to add the panel to
     type: string
     required: true
