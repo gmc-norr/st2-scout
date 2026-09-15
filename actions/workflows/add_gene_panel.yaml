@@ -18,8 +18,8 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - display_name: "{{ result().result.body.name.split('_v.')[0] }}"
-          - version: "{{ result().result.body.name.split('_v.')[1] }}"
+          - display_name: "{{ result().result.body.name.split('.')[0].replace(' v', '') }}"
+          - version: "{{ result().result.body.name.split('.', 1)[1] }}"
           - panel_name: "{{ ctx().gene_panel_id.split('_PAN_')[0] | lower }}"
           - genes: <% result().result.body.genes %>
         do: get_date
@@ -55,4 +55,4 @@ tasks:
     action: scout.load_gene_panel
     input:
       gene_panel_file: <% ctx().gene_panel_file %>
-
+      institute: <% ctx().institute %>

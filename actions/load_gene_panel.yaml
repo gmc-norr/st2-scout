@@ -29,3 +29,9 @@ parameters:
     description: "Path to gene panel file on the remote host"
     required: true
     position: 0
+
+  institute:
+    type: string
+    description: "Scout intitute to add the gene panel to"
+    required: true
+    position: 1
