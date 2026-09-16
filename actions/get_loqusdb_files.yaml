@@ -11,13 +11,12 @@ parameters:
     required: true
     description: analysis pipeline that has been run
 
-  analysis_dir:
-    type: string
-    required: true
-    description: parent dir for analysis
-
   case_id:
     type: string
     required: true
     description: case_id for case
     
+  sample_id:
+    type: string
+    required: true
+    description: sample_id for case

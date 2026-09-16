@@ -17,8 +17,8 @@ class GetLoqusdbFilesAction(Action):
         try:
             loqusdb_config = self.config["loqusdb_config_map"][pipeline]
 
-            loqusdb_vcf = self._get_vcf(analysis_dir, case_id)
-            loqusdb_ped = self._get_ped(analysis_dir, case_id)
+            loqusdb_vcf = self._get_vcf(pipeline, analysis_dir, case_id)
+            loqusdb_ped = self._get_ped(pipeline, analysis_dir, case_id)
             return  (
                 True,
                 {
@@ -31,21 +31,23 @@ class GetLoqusdbFilesAction(Action):
         except Exception as e:
             return (False, {"error": str(e)})
 
-    def _get_ped(self, analysis_dir: str, case_id: str):
+    def _get_ped(self, pipeline:str, sample_id:str, case_id: str):
 
-        ped_analysis_subdir = self.config["loqusdb_ped"]["analysis_subdir"]
-        ped_suffix = self.config["loqusdb_ped"]["suffix"]
-        ped_path = Path(analysis_dir) / ped_analysis_subdir / f"{case_id}{ped_suffix}"
+        ped_pattern = self.config["loqusdb_ped_pattern"][pipeline]
+
+        if ped_pattern == "":
+            return ""
+        ped_path = Path(ped_pattern.replace('case_id', case_id).replace('sample_id', sample_id))
 
         if not ped_path.exists():
             raise FileNotFoundError(f"ped path {ped_path} does not exist")
             
         return str(ped_path)
 
-    def _get_vcf(self, analysis_dir: str, case_id: str):
-        vcf_analysis_subdir = self.config["loqusdb_vcf"]["analysis_subdir"]
-        vcf_suffix = self.config["loqusdb_vcf"]["suffix"]
-        vcf_path = Path(analysis_dir) / vcf_analysis_subdir / f"{case_id}{vcf_suffix}"
+    def _get_vcf(self, pipeline:str, sample_id: str, case_id: str):
+        vcf_pattern = self.config["loqusdb_vcf_pattern"][pipeline]
+
+        vcf_path = Path(vcf_pattern.replace('case_id', case_id).replace('sample_id', sample_id))
 
         if not vcf_path.exists():
             raise FileNotFoundError(f"vcf path {vcf_path} does not exist")

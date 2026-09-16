@@ -14,12 +14,12 @@ loqusdb_config_map:
   type: object
   required: true
 
-loqusdb_ped:
-  description: subdir and suffix for ped file to be used by loqusdb
+loqusdb_ped_pattern:
+  description: for supported pipelines, pattern for ped file to be used by loqusdb
   type: object
   required: true
 
-loqusdb_vcf:
-  description: subdir and suffix for vcf file to be used by loqusdb
+loqusdb_vcf_pattern:
+  description: for supported pipelines, pattern for vcf file to be used by loqusdb
   type: object
   required: true
