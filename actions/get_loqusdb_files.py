@@ -12,13 +12,13 @@ class GetLoqusdbFilesAction(Action):
     depending on what pipeline is run
     """
 
-    def run(self, pipeline: str, analysis_dir: str, case_id:str):
+    def run(self, pipeline: str, analysis_dir: str, sample_id, case_id:str):
 
         try:
             loqusdb_config = self.config["loqusdb_config_map"][pipeline]
 
-            loqusdb_vcf = self._get_vcf(pipeline, analysis_dir, case_id)
-            loqusdb_ped = self._get_ped(pipeline, analysis_dir, case_id)
+            loqusdb_vcf = self._get_vcf(pipeline, analysis_dir, sample_id, case_id)
+            loqusdb_ped = self._get_ped(pipeline, analysis_dir, sample_id, case_id)
             return  (
                 True,
                 {
@@ -31,23 +31,23 @@ class GetLoqusdbFilesAction(Action):
         except Exception as e:
             return (False, {"error": str(e)})
 
-    def _get_ped(self, pipeline:str, sample_id:str, case_id: str):
+    def _get_ped(self, pipeline:str, analysis_dir:str, sample_id:str, case_id: str):
 
         ped_pattern = self.config["loqusdb_ped_pattern"][pipeline]
 
         if ped_pattern == "":
             return ""
-        ped_path = Path(ped_pattern.replace('case_id', case_id).replace('sample_id', sample_id))
+        ped_path = Path(analysis_dir) / ped_pattern.replace('case_id', case_id).replace('sample_id', sample_id)
 
         if not ped_path.exists():
             raise FileNotFoundError(f"ped path {ped_path} does not exist")
             
         return str(ped_path)
 
-    def _get_vcf(self, pipeline:str, sample_id: str, case_id: str):
+    def _get_vcf(self, pipeline:str, analysis_dir:str, sample_id: str, case_id: str):
         vcf_pattern = self.config["loqusdb_vcf_pattern"][pipeline]
 
-        vcf_path = Path(vcf_pattern.replace('case_id', case_id).replace('sample_id', sample_id))
+        vcf_path = Path(analysis_dir) / vcf_pattern.replace('case_id', case_id).replace('sample_id', sample_id)
 
         if not vcf_path.exists():
             raise FileNotFoundError(f"vcf path {vcf_path} does not exist")
