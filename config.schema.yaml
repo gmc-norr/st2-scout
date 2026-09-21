@@ -8,18 +8,3 @@ scout_cwd:
   description: working directory on scout host
   type: string
   required: true
-
-loqusdb_config_map:
-  description: mapping analysis pipeline to config file mounted in docker container
-  type: object
-  required: true
-
-loqusdb_ped_pattern:
-  description: for supported pipelines, pattern for ped file to be used by loqusdb
-  type: object
-  required: true
-
-loqusdb_vcf_pattern:
-  description: for supported pipelines, pattern for vcf file to be used by loqusdb
-  type: object
-  required: true
