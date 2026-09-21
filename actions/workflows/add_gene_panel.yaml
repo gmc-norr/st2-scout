@@ -8,7 +8,10 @@ input:
   - output_path
 
 vars:
-  - gene_panel_file: "{{ ctx().output_path }}/{{ ctx().gene_panel_id }}.tsv"
+  panel_name:
+  genes:
+  date:
+  gene_panel_file:
 
 tasks:
   get_gene_panel:
@@ -30,6 +33,7 @@ tasks:
       - when: <% succeeded() %>
         publish:
           - date: <% result().stdout %>
+          - gene_panel_file: "{{ ctx().output_path }}/{{ ctx().gene_panel_id }}_{{ ctx().date }}.tsv"
         do:
           write_file_beginning
 
@@ -54,11 +58,3 @@ tasks:
     input:
       gene_panel_file: <% ctx().gene_panel_file %>
       institute: <% ctx().institute %>
-    next:
-      - when: <% succeeded() %>
-        do: remove_file
-
-  remove_file:
-    action: core.local
-    input:
-      cmd: rm <% ctx().gene_panel_file %>  
