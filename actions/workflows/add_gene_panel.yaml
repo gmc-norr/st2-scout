@@ -54,3 +54,11 @@ tasks:
     input:
       gene_panel_file: <% ctx().gene_panel_file %>
       institute: <% ctx().institute %>
+    next:
+      - when: <% succeeded() %>
+        do: remove_file
+
+  remove_file:
+    action: core.local
+    input:
+      cmd: rm <% ctx().gene_panel_file %>  
