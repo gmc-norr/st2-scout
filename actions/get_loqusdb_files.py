@@ -2,9 +2,10 @@ from pathlib import Path
 
 from st2common.runners.base_action import Action
 
-import logging
 
-log = logging.getLogger(__name__)
+PIPELINE_RD = "nf-core/raredisease"
+PIPELINE_GMS = "genomic-medicine-sweden/Twist_Solid"
+
 
 class GetLoqusdbFilesAction(Action):
     """
@@ -12,46 +13,29 @@ class GetLoqusdbFilesAction(Action):
     depending on what pipeline is run
     """
 
-    def run(self, pipeline: str, analysis_dir: str, sample_id, case_id:str):
-
+    def run(self, pipeline: str, analysis_dir: str, sample_id: str, case_id: str):
+        PIPELINE_TO_LOQUSDB_SPECIFICS = {
+            PIPELINE_RD: {
+                "loqusdb_config": "/home/worker/config/loqusdb_rd.yaml",
+                "loqusdb_ped": f"{analysis_dir}/raredisease_results/pedigree/{case_id}.ped",
+                "loqusdb_vcf": f"{analysis_dir}/raredisease_results/call_snv/genome/{case_id}_snv.vcf.gz"
+            },
+            PIPELINE_GMS: {
+                "loqusdb_config": "/home/worker/config/loqusdb_somatic.yaml",
+                "loqusdb_ped": "",
+                "loqusdb_vcf": f"{analysis_dir}/results/dna/{sample_id}_T/additional_files/vcf/{sample_id}"
+                "_T.annotated.exon_only.filter.soft_filter.vcf"
+            }
+        }
         try:
-            loqusdb_config = self.config["loqusdb_config_map"][pipeline]
+            specifics = PIPELINE_TO_LOQUSDB_SPECIFICS[pipeline]
+        except KeyError as e:
+            raise e(f"Unknown pipeline: {pipeline}")
 
-            loqusdb_vcf = self._get_vcf(pipeline, analysis_dir, sample_id, case_id)
-            loqusdb_ped = self._get_ped(pipeline, analysis_dir, sample_id, case_id)
-            return  (
-                True,
-                {
-                    "loqusdb_config": loqusdb_config,
-                    "loqusdb_ped": loqusdb_ped,
-                    "loqusdb_vcf": loqusdb_vcf
-                },
-            )
-        
-        except Exception as e:
-            return (False, {"error": str(e)})
-
-    def _get_ped(self, pipeline:str, analysis_dir:str, sample_id:str, case_id: str):
-
-        ped_pattern = self.config["loqusdb_ped_pattern"][pipeline]
-
-        if ped_pattern == "":
-            return ""
-        ped_path = Path(analysis_dir) / ped_pattern.replace('case_id', case_id).replace('sample_id', sample_id)
-
-        if not ped_path.exists():
-            raise FileNotFoundError(f"ped path {ped_path} does not exist")
-            
-        return str(ped_path)
-
-    def _get_vcf(self, pipeline:str, analysis_dir:str, sample_id: str, case_id: str):
-        vcf_pattern = self.config["loqusdb_vcf_pattern"][pipeline]
-
-        vcf_path = Path(analysis_dir) / vcf_pattern.replace('case_id', case_id).replace('sample_id', sample_id)
-
-        if not vcf_path.exists():
-            raise FileNotFoundError(f"vcf path {vcf_path} does not exist")
-            
-        return str(vcf_path)
-
+        if not Path(specifics['loqusdb_vcf']).exists():
+            raise FileNotFoundError(f"vcf path {specifics['loqusdb_vcf']} does not exist")
+        if specifics["loqusdb_ped"] != "":
+            if not Path(specifics['loqusdb_ped']).exists():
+                raise FileNotFoundError(f"vcf path {specifics['loqusdb_ped']} does not exist")
+        return  (True, specifics)
                 
