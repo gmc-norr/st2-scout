@@ -18,9 +18,7 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - display_name: "{{ result().result.body.name.split('.')[0].replace(' v', '') }}"
-          - version: "{{ result().result.body.name.split('.', 1)[1] }}"
-          - panel_name: "{{ ctx().gene_panel_id.split('_PAN_')[0] | lower }}"
+          - panel_name: "{{ result().result.body.name }}"
           - genes: <% result().result.body.genes %>
         do: get_date
 
@@ -38,7 +36,7 @@ tasks:
   write_file_beginning:
     action: core.local
     input:
-      cmd: echo -e "##panel_id=<% ctx().panel_name %>\n##institute=<% ctx().institute %>\n##version=<% ctx().version %>\n##date=<% ctx().date %>\n##display_name=<% ctx().display_name %>" > <% ctx().gene_panel_file %>
+      cmd: echo -e "##panel_id=<% ctx().gene_panel_id %>\n##institute=<% ctx().institute %>\n##date=<% ctx().date %>\n##display_name=<% ctx().panel_name %>" > <% ctx().gene_panel_file %>
     next:
       - when: <% succeeded() %>
         do: write_genes
