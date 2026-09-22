@@ -197,14 +197,9 @@ tasks:
     input:
       load_config: <% ctx().load_config_path %>
     next:
-      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease"%>
+      - when: <% succeeded() %>
         do: 
           - get_loqusdb_files
-      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid"%>
-        publish:
-          - success_message: "Variants and case loaded successfully into scout for case <% ctx().case_id %>, using the <% ctx().pipeline %> pipeline"
-        do:
-          - report_success
       - when: <% failed() %>
         publish:
           - msg: "{{ result() | to_json_string }}"
@@ -215,8 +210,9 @@ tasks:
     action: scout.get_loqusdb_files
     input:
       pipeline: <% ctx().pipeline %>
-      analysis_dir: "{{ctx().output_path}}/raredisease_results/"
+      analysis_dir: <% ctx().output_path %>
       case_id: <% ctx().case_id %>
+      sample_id: <% ctx().sample_id %>
     next:
       - when: <% succeeded() %>
         publish:
@@ -235,8 +231,9 @@ tasks:
     action: scout.load_variants
     input:
       vcf_file: <% ctx().loqusdb_vcf %>
-      ped_file: <% ctx().loqusdb_ped %>
       config_file: <% ctx().loqusdb_config %>
+      case_id: <% ctx().case_id %>
+      ped_file: <% ctx().loqusdb_ped %>
     next:
       - when: <% succeeded() %>
         publish:

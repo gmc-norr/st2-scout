@@ -3,16 +3,17 @@
 set -euo pipefail
 
 SNV_VCF="$1"
-PED="$2"
-CONFIG="$3"
+CONFIG="$2"
+CASE="$3"
+PED="$4"
 
 if [[ -z "${SNV_VCF}" ]]; then
   echo "Missing required parameter: vcf_file" >&2
   exit 1
 fi
 
-if [[ -z "${PED}" ]]; then
-  echo "Missing required parameter: ped_file" >&2
+if [[ -z "${PED}" && -z "${CASE}" ]]; then
+  echo "Missing required parameter: ped_file and case_id" >&2
   exit 1
 fi
 
@@ -26,9 +27,13 @@ if [[ ! -f "${SNV_VCF}" ]]; then
   exit 1
 fi
 
-if [[ ! -f "${PED}" ]]; then
+if [[ ! -z "${PED}" && ! -f "${PED}" ]]; then
   echo "ped_file does not exist on remote host: ${PED}" >&2
   exit 1
 fi
 
-docker compose run --rm loqusdb-cli loqusdb -c "${CONFIG}" load --variant-file "${SNV_VCF}" --family-file "${PED}"
+if [[ -z "${PED}" ]]; then
+  docker compose run --rm loqusdb-cli loqusdb -c "${CONFIG}" load --variant-file "${SNV_VCF}" --case-id "${CASE}";
+else
+  docker compose run --rm loqusdb-cli loqusdb -c "${CONFIG}" load --variant-file "${SNV_VCF}" --family-file "${PED}";
+fi
