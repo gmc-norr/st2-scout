@@ -8,10 +8,10 @@ input:
   - output_path
 
 vars:
-  panel_name:
-  genes:
-  date:
-  gene_panel_file:
+  - panel_name:
+  - genes:
+  - date:
+  - gene_panel_file:
 
 tasks:
   get_gene_panel:
