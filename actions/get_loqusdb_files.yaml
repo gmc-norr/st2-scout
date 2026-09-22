@@ -18,10 +18,10 @@ parameters:
 
   case_id:
     type: string
-    required: true
+    required: false
     description: case_id for case
     
   sample_id:
     type: string
-    required: true
+    required: false
     description: sample_id for case
