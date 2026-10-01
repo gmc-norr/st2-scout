@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.3](https://github.com/gmc-norr/st2-scout/compare/v2.1.2...v2.1.3) (2026-10-01)
+
+
+### Bug Fixes
+
+* use processed sample ids for scout case names (with fallbacks) ([#29](https://github.com/gmc-norr/st2-scout/issues/29)) ([c5dca7e](https://github.com/gmc-norr/st2-scout/commit/c5dca7efe5166374b746030ed3ca56c2768308c7))
+
 ## [2.1.2](https://github.com/gmc-norr/st2-scout/compare/v2.1.1...v2.1.2) (2026-09-07)
 
 
