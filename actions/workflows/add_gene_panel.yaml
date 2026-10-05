@@ -1,0 +1,60 @@
+version: 1.0
+
+description: Add gene panel to Scout 
+
+input:
+  - gene_panel_id
+  - institute
+  - output_path
+
+vars:
+  - panel_name:
+  - genes:
+  - date:
+  - gene_panel_file:
+
+tasks:
+  get_gene_panel:
+    action: igene.get_panels
+    input:
+      panel: <% ctx().gene_panel_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - panel_name: "{{ result().result.body.name }}"
+          - genes: <% result().result.body.genes %>
+        do: get_date
+
+  get_date:
+    action: core.local
+    input:
+      cmd: date +%F
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - date: <% result().stdout %>
+          - gene_panel_file: "{{ ctx().output_path }}/{{ ctx().gene_panel_id }}_{{ ctx().date }}.tsv"
+        do:
+          write_file_beginning
+
+  write_file_beginning:
+    action: core.local
+    input:
+      cmd: echo -e "##panel_id=<% ctx().gene_panel_id %>\n##institute=<% ctx().institute %>\n##date=<% ctx().date %>\n##display_name=<% ctx().panel_name %>" > <% ctx().gene_panel_file %>
+    next:
+      - when: <% succeeded() %>
+        do: write_genes
+
+  write_genes:
+    action: core.local
+    input:
+      cmd: echo -e "#hgnc_id\thgnc_symbol\n{% for gene in ctx().genes %}{{ gene.hgnc.split(':')[1] + '\t' + gene.symbol + '\n' }}{% endfor %}" >> "{{ ctx().gene_panel_file }}"
+    next:
+      - when: <% succeeded() %>
+        do: load_panel
+
+  load_panel:
+    action: scout.load_gene_panel
+    input:
+      gene_panel_file: <% ctx().gene_panel_file %>
+      institute: <% ctx().institute %>

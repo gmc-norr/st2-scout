@@ -1,0 +1,20 @@
+---
+name: add_gene_panel
+pack: scout
+description: Add gene panel to scout
+runner_type: orquesta
+entry_point: workflows/add_gene_panel.yaml
+enabled: true
+
+parameters:
+  gene_panel_id:
+    description: Code of the gene panel from iGene, i.e., X_PAN_WGS_v.Y.0 or X_PAN_GMS560_v.Y.0
+    type: string
+    required: true
+  institute:
+    description: Which institute in Scout to add the panel to
+    type: string
+    required: true
+  output_path:
+    description: Directory to save gene panel text file
+    default:  "{{ config_context.gene_panel_dir }}"
