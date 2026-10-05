@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/gmc-norr/st2-scout/compare/v2.1.2...v2.2.0) (2026-10-05)
+
+
+### Features
+
+* add action to load gene panel from iGene ([#27](https://github.com/gmc-norr/st2-scout/issues/27)) ([cf757da](https://github.com/gmc-norr/st2-scout/commit/cf757dabe1f26137062ff9f895a13b7aba6b6197))
+
+
+### Bug Fixes
+
+* use processed sample ids for scout case names (with fallbacks) ([#29](https://github.com/gmc-norr/st2-scout/issues/29)) ([c5dca7e](https://github.com/gmc-norr/st2-scout/commit/c5dca7efe5166374b746030ed3ca56c2768308c7))
+
 ## [2.1.2](https://github.com/gmc-norr/st2-scout/compare/v2.1.1...v2.1.2) (2026-09-07)
 
 
