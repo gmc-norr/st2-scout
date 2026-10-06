@@ -19,10 +19,10 @@ tasks:
     input:
       panels_tsv: <% ctx().scout_panels_tsv %>
     next:
-      when: <% succeeded() %>
-      publish:
-        - scout_panels: <% result().result %>
-      do: get_igene_panels
+      - when: <% succeeded() %>
+        publish:
+          - scout_panels: <% result().result %>
+        do: get_igene_panels
 
   get_igene_panels:
     action: igene.get_panels
