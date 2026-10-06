@@ -7,6 +7,9 @@ input:
 
 vars:
   - panel_comparison
+      matching_panels: []
+      gene_count_mismatches: []
+      missing_in_scout: []
 
 tasks:
   get_scout_panels:
