@@ -3,7 +3,10 @@ version: 1.0
 description: compare panels between igene and scout 
 
 input:
-  update: false
+  - update: false
+
+vars:
+  - panel_comparison
 
 tasks:
   get_scout_panels:
@@ -50,6 +53,10 @@ tasks:
       items: panel in <% ctx().panel_comparison.missing_in_scout %>
     input:
       gene_panel_id: <% item(panel).panel_name %>
+      institute: <% switch(
+        '_PAN_GMS560_' in item(panel).panel_name => 'clinical_solid',
+        '_PAN_WGS_' in item(panel).panel_name => 'clinical_rd'
+        ) %>
 
 output:
   - panel_comparison: <% ctx().panel_comparison %>
