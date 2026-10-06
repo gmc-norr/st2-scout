@@ -6,7 +6,7 @@ input:
   - update: false
 
 vars:
-  - panel_comparison
+  - panel_comparison:
       matching_panels: []
       gene_count_mismatches: []
       missing_in_scout: []
