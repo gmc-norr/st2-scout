@@ -17,7 +17,7 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - scout_panels_tsv: <% result().stdout %>
+          - scout_panels_tsv: <% result().values().first().stdout %>
         do: parse_scout_panels
 
   parse_scout_panels:
