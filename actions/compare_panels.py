@@ -26,14 +26,23 @@ class ComparePanels(Action):
             for igene_panel in igene_panels:
                 igene_id = igene_panel.get("id")
 
-                if not igene_id:
+                if igene_id is None:
                     raise ValueError(
                         f"iGene panel is missing required field 'id': "
                         f"{igene_panel}"
                     )
+                # Skip if not WGS or GMS560 panel
+                if ("_PAN_WGS_" not in igene_id
+                    and "_PAN_GMS560_" not in igene_id
+                ):
+                    continue
 
                 igene_genes = igene_panel.get("genes") or []
                 igene_gene_count = len(igene_genes)
+
+                # Skip if panel has no genes in igene
+                if igene_gene_count == 0:
+                    continue
 
                 scout_panel = scout_by_name.get(igene_id)
 
