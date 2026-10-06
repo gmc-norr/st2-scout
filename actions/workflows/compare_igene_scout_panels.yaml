@@ -2,6 +2,9 @@ version: 1.0
 
 description: compare panels between igene and scout 
 
+input:
+  update: false
+
 tasks:
   get_scout_panels:
     action: scout.get_scout_panels
@@ -38,6 +41,15 @@ tasks:
       - when: <% succeeded() %>
         publish:
           - panel_comparison: <% result().result %>
+      - when: <% succeeded() and ctx().update and result().result.missing_in_scout.len() > 0 %>
+        do: add_missing_panels
+
+  add_missing_panels:
+    action: scout.add_gene_panel
+    with:
+      items: panel in <% ctx().panel_comparison.missing_in_scout %>
+    input:
+      gene_panel_id: <% item(panel).panel_name %>
 
 output:
   - panel_comparison: <% ctx().panel_comparison %>
