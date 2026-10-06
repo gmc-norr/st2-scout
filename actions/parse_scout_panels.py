@@ -7,29 +7,34 @@ from st2common.runners.base_action import Action
 class ParseScoutPanels(Action):
 
     def run(self, panels_tsv):
-        if panels_tsv is None or not panels_tsv.strip():
-            raise ValueError("Scout panels TSV output is empty")
 
-        stream = io.StringIO(panels_tsv)
-        reader = csv.DictReader(stream, delimiter="\t")
+        try:
+            if panels_tsv is None or not panels_tsv.strip():
+                raise ValueError("Scout panels TSV output is empty")
 
-        panels = []
+            stream = io.StringIO(panels_tsv)
+            reader = csv.DictReader(stream, delimiter="\t")
 
-        for row_number, row in enumerate(reader, start=2):
-            panel = {
-                self._clean_header(key): self._convert_value(value)
-                for key, value in row.items()
-                if key is not None
-            }
+            panels = []
 
-            if not panel.get("panel_name"):
-                raise ValueError(
-                    "Missing panel_name on TSV row {}".format(row_number)
-                )
+            for row_number, row in enumerate(reader, start=2):
+                panel = {
+                    self._clean_header(key): self._convert_value(value)
+                    for key, value in row.items()
+                    if key is not None
+                }
 
-            panels.append(panel)
+                if not panel.get("panel_name"):
+                    raise ValueError(
+                        "Missing panel_name on TSV row {}".format(row_number)
+                    )
 
-        return panels
+                panels.append(panel)
+
+            return (True, panels)
+
+        except Exception as e:
+            return (False, {"error": str(e)})
     
     def _clean_header(self, header):
         return header.strip().lstrip("#")

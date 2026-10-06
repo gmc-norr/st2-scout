@@ -1,0 +1,17 @@
+---
+name: compare_panels
+description: "Compare iGene panels with panels currently loaded in Scout"
+runner_type: python-script
+entry_point: compare_panels.py
+enabled: true
+
+parameters:
+  scout_panels:
+    type: array
+    description: "Panels currently loaded in Scout"
+    required: true
+
+  igene_panels:
+    type: array
+    description: "Panels returned by the iGene API"
+    required: true

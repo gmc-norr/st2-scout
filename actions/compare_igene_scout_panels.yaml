@@ -1,0 +1,7 @@
+---
+name: compare_igene_scout_panels
+pack: scout
+description: "Compare panels between iGene and Scout"
+runner_type: orquesta
+entry_point: workflows/compare_igene_scout_panels.yaml
+enabled: true

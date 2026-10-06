@@ -1,0 +1,43 @@
+version: 1.0
+
+description: compare panels between igene and scout 
+
+tasks:
+  get_scout_panels:
+    action: scout.get_scout_panels
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - scout_panels_tsv: <% result().stdout %>
+        do: parse_scout_panels
+
+  parse_scout_panels:
+    action: scout.parse_scout_panels
+    input:
+      panels_tsv: <% ctx().scout_panels_tsv %>
+    next:
+      when: <% succeeded() %>
+      publish:
+        - scout_panels: <% result().result %>
+      do: get_igene_panels
+
+  get_igene_panels:
+    action: igene.get_panels
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - igene_panels: "{{ result().result.body }}"
+        do: compare_panels
+
+  compare_panels:
+    action: scout.compare_panels
+    input:
+      scout_panels: <% ctx().scout_panels %>
+      igene_panels: <% ctx().igene_panels %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - panel_comparison: <% result().result %>
+
+output:
+  - panel_comparison: <% ctx().panel_comparison %>
