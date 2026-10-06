@@ -1,0 +1,34 @@
+version: 1.0
+
+description: Add gene panel to Scout 
+
+vars:
+  - panel_name:
+  - genes:
+  - date:
+  - gene_panel_file:
+
+tasks:
+  get_scout_panels:
+    action: get_scout_panels
+    input:
+      panel: <% ctx().gene_panel_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - scout_panels: "{{ result().result.body.name }}"
+        do: get_igene_panels
+
+  get_igene_panels:
+    action: igene.get_panels
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - igene_panels: "{{ result().result.body.name }}"
+        do: compare_panels
+
+  compare_panels:
+    action: compare_panels
+    next:
+      - when: <% succeeded() %>
+        output: ...
