@@ -95,6 +95,11 @@ class ComparePanels(Action):
         scout_by_name = {}
 
         for panel in scout_panels:
+            
+            # Only consider panels with version 1.0 since these should not be changed in scout
+            if panel['version'] != '1.0':
+                continue
+                
             panel_name = panel.get("panel_name")
 
             if not panel_name:
