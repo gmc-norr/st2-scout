@@ -1,0 +1,65 @@
+version: 1.0
+
+description: compare panels between igene and scout 
+
+input:
+  - update: false
+
+vars:
+  - panel_comparison:
+      matching_panels: []
+      gene_count_mismatches: []
+      missing_in_scout: []
+
+tasks:
+  get_scout_panels:
+    action: scout.get_scout_panels
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - scout_panels_tsv: <% result().values().first().stdout %>
+        do: parse_scout_panels
+
+  parse_scout_panels:
+    action: scout.parse_scout_panels
+    input:
+      panels_tsv: <% ctx().scout_panels_tsv %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - scout_panels: <% result().result %>
+        do: get_igene_panels
+
+  get_igene_panels:
+    action: igene.get_panels
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - igene_panels: "{{ result().result.body }}"
+        do: compare_panels
+
+  compare_panels:
+    action: scout.compare_panels
+    input:
+      scout_panels: <% ctx().scout_panels %>
+      igene_panels: <% ctx().igene_panels %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - panel_comparison: <% result().result %>
+      - when: <% succeeded() and ctx().update and result().result.missing_in_scout.len() > 0 %>
+        do: add_missing_panels
+
+  add_missing_panels:
+    action: scout.add_gene_panel
+    with:
+      items: panel in <% ctx().panel_comparison.missing_in_scout %>
+    input:
+      gene_panel_id: <% item(panel).panel_name %>
+      institute: <% switch(
+        '_PAN_GMS560_' in item(panel).panel_name => 'clingen-solid',
+        '_PAN_WGS_' in item(panel).panel_name => 'clingen-rd'
+        ) %>
+
+output:
+  - panel_comparison: <% ctx().panel_comparison %>

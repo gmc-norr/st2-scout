@@ -29,6 +29,9 @@ scout.get_loqusdb_files                           | Get necessary files for loqu
 scout.load_case                                   | Load a case from a load config into scout
 scout.load_variants                               | Load variants from a case into loqusdb
 scout.generate_and_load_case                      | Action triggering the generate_and_load_case workflow
+scout.add_gene_panel                              | Action adding gene panels from iGene to scout
+scout.compare_igene_scout_panels                  | Action comparing, and optionally updates, panels between iGene and Scout
+scout.get_scout_panels                            | Gets gene panels from scout
 
 ## Workflows
 ref                                               | description
