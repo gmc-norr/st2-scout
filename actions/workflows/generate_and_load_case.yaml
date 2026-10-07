@@ -201,6 +201,17 @@ tasks:
         do:
           - report_failure
 
+  get_gens_files:
+    action: cleve.get_analysis_files
+    input:
+      name: <% ctx().case_id %>_...
+      level: case
+    next:
+      - when: <% succeeded() and result().body.count() > 0 %>
+        publish: 
+          - gens_baf_file: <% result().body.first().select(file_path) %> 
+        do...
+
   report_failure:
     action: core.inject_trigger
     input:
