@@ -8,3 +8,8 @@ scout_cwd:
   description: working directory on scout host
   type: string
   required: true
+
+gene_panel_dir:
+  description: directory where gene panel text files are saved
+  type: string
+  required: true
