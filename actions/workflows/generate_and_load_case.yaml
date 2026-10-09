@@ -212,7 +212,7 @@ tasks:
       pipeline: <% ctx().pipeline %>
       analysis_dir: <% ctx().output_path %>
       case_id: <% ctx().case_id %>
-      sample_id: <% ctx().sample_id %>
+      sample_id: <% ctx().sample_ids[0] %>
     next:
       - when: <% succeeded() %>
         publish:
