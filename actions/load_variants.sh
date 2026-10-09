@@ -33,7 +33,7 @@ if [[ ! -z "${PED}" && ! -f "${PED}" ]]; then
 fi
 
 if [[ -z "${PED}" ]]; then
-  docker compose run --rm loqusdb-cli loqusdb -c "${CONFIG}" load --variant-file "${SNV_VCF}" --case-id "${CASE}";
+  docker compose run --rm loqusdb-cli loqusdb -c "${CONFIG}" load --variant-file "${SNV_VCF}" --case-id "${CASE}" --qual-gq;
 else
   docker compose run --rm loqusdb-cli loqusdb -c "${CONFIG}" load --variant-file "${SNV_VCF}" --family-file "${PED}";
 fi
