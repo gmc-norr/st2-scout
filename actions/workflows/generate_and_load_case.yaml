@@ -219,8 +219,6 @@ tasks:
         publish:
           - msg: "no coverage bed file in cleve:
               {{ result() | to_json_string }}"
-        do:
-          - report_failure
       - when: <% succeeded() and result().result.body.count() > 0 and result().result.body.first().path.endsWith("_gens.cov.bed.gz") %>
         publish:
           - gens_cov_file: <% result().result.body.first().path %>
