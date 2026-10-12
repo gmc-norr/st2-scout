@@ -194,7 +194,7 @@ tasks:
         publish:
           - success_message: "Variants and case loaded successfully into scout and loqusdb for case <% ctx().case_id %>, using the <% ctx().pipeline %> pipeline"
         do:
-          - report_success
+          - get_gens_cov_file
       - when: <% failed() %>
         publish:
           - msg: <% result().values().first().stderr %>
