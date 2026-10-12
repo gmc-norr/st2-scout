@@ -1,14 +1,14 @@
 ---
-name: load_case
-description: "Load a case into Scout from a load-config inside the Scout container"
+name: load_gens
+description: "Load a case into gens"
 runner_type: remote-shell-script
-entry_point: load_case.sh
+entry_point: load_gens.sh
 enabled: true
 
 parameters:
   hosts:
     type: string
-    description: "Remote host running the Scout Docker container"
+    description: "Remote host running the gens Docker container"
     required: true
     default: "{{ config_context.scout_host }}"
 
