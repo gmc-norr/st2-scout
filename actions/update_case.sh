@@ -17,18 +17,18 @@ if [[ ! -f "${VCF_PATH}" ]]; then
   exit 1
 fi
 
-if [[ "$CANCER" -eq "true"]];then
-  if [[ "$SV" -eq "true"]]; then
+if [[ "$CANCER" == "1" ]]; then
+  if [[ "$SV" == "1" ]]; then
     UPDATE_OPTION="--vcf-cancer-sv"
   else
     UPDATE_OPTION="--vcf-cancer"
   fi
 else
-  if [[ "$SV" -eq "true"]]; then
+  if [[ "$SV" == "1" ]]; then
     UPDATE_OPTION="--vcf-sv"
   else
     UPDATE_OPTION="--vcf"
   fi
 fi
 
-echo docker compose exec scout scout update case "${UPDATE_OPTION}" "${VCF_PATH}" "${CASE_ID}"
+docker compose exec scout scout update case "${UPDATE_OPTION}" "${VCF_PATH}" "${CASE_ID}"
