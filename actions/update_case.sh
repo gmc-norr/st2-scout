@@ -19,13 +19,13 @@ fi
 
 if [[ "$CANCER" == "1" ]]; then
   if [[ "$SV" == "1" ]]; then
-    UPDATE_OPTION="--vcf-cancer-sv"
+    UPDATE_OPTION="--sv-rankmodel-version 0.1 --vcf-cancer-sv"
   else
     UPDATE_OPTION="--vcf-cancer"
   fi
 else
   if [[ "$SV" == "1" ]]; then
-    UPDATE_OPTION="--vcf-sv"
+    UPDATE_OPTION="--sv-rankmodel-version 0.1 --vcf-sv"
   else
     UPDATE_OPTION="--vcf"
   fi
