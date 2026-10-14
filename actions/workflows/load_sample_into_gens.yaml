@@ -1,0 +1,71 @@
+
+version: 1.0
+
+description: Load sample into gens
+
+input:
+  - case_id
+  - sample_id
+  - analysis_id
+
+output:
+  - load_config_path: <% ctx().load_config_path %>
+
+tasks:  
+  
+  get_gens_cov_file:
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().analysis_id %>
+      level: sample
+      parent_id: <% ctx().sample_id %>
+      name: <% ctx().sample_id %>_gens.cov.bed.gz
+    next:
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "failed to find coverage bed file in cleve:
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+      - when: <% succeeded() and result().result.body.count() = 0 %>
+        publish:
+          - msg: "no coverage bed file in cleve:
+              {{ result() | to_json_string }}"
+      - when: <% succeeded() and result().result.body.count() > 0 and result().result.body.first().path.endsWith("_gens.cov.bed.gz") %>
+        publish:
+          - gens_cov_file: <% result().result.body.first().path %>
+        do:
+          - get_gens_baf_file
+
+  get_gens_baf_file:
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().analysis_id %>
+      level: sample
+      parent_id: <% ctx().sample_id %>
+      name: <% ctx().sample_id %>_gens.baf.bed.gz
+    next:
+      - when: "{{ failed() }}"
+        publish:
+          - msg: "failed to find baf bed file in cleve:
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+      - when: <% succeeded() and result().result.body.count() = 0 %>
+        publish:
+          - msg: "no coverage baf file in cleve:
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+      - when: <% succeeded() and result().result.body.count() > 0 and result().result.body.first().path.endsWith("_gens.baf.bed.gz") %>
+        publish:
+          - gens_baf_file: <% result().result.body.first().path %>
+        do:
+          - load_gens
+
+  load_gens:
+    action: scout.load_gens
+    input:
+      baf_file: <% ctx().gens_baf_file %>
+      cov_file: <% ctx().gens_cov_file %>
+      case_id: <% ctx().case_id %>

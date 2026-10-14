@@ -36,7 +36,7 @@ parameters:
     required: true
     position: 1
 
-  load_config:
+  case_id:
     type: string
     description: "case_id of case, coresponding to case_id in scout"
     required: true
