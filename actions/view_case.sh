@@ -9,4 +9,4 @@ if [[ -z "${DISPLAY_NAME}" ]]; then
   exit 1
 fi
 
-docker compose exec scout scout view case -d "${DISPLAY_NAME}"
+docker compose exec scout scout view cases -d "${DISPLAY_NAME}"
