@@ -63,22 +63,11 @@ class GenerateLoadConfigAction(Action):
         m = pat.match(igene_panel)
         if m is None:
             raise ValueError(f"unknown panel: {igene_panel}")
-        scout_panel = m.group(1)
 
-        if m.group(3) == "GMS560":
-            return scout_panel.lower()
-
-        elif m.group(3) == "WGS":
-            # Super-panels should include the suffix
-            if m.group(2) == "SP":
-                scout_panel += "_SP"
-            # Stupid special case
-            if scout_panel == "HTAD":
-                return scout_panel.lower()
-            return scout_panel
-
-        else:
+        if not m.group(1) in ["WGS", "GMS560"]:
             raise ValueError(f"Unknown panel {m.group(0)}")
+
+        return igene_panel
 
     def _case_entry(
         self,
