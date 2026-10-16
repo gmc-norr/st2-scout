@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.2.0](https://github.com/gmc-norr/st2-scout/compare/v2.1.2...v2.2.0) (2026-10-16)
+
+
+### Features
+
+* add action `export_case` ([#35](https://github.com/gmc-norr/st2-scout/issues/35)) ([5d0dc0d](https://github.com/gmc-norr/st2-scout/commit/5d0dc0de0cbb8f0fc2481f22832f5fff60f8141d))
+* add action `view_case` ([#34](https://github.com/gmc-norr/st2-scout/issues/34)) ([e7df1e9](https://github.com/gmc-norr/st2-scout/commit/e7df1e97394ddac92fb127f43fb89b27f37aea26))
+* add action to load gene panel from iGene ([#27](https://github.com/gmc-norr/st2-scout/issues/27)) ([cf757da](https://github.com/gmc-norr/st2-scout/commit/cf757dabe1f26137062ff9f895a13b7aba6b6197))
+* compare panels ([#31](https://github.com/gmc-norr/st2-scout/issues/31)) ([e018848](https://github.com/gmc-norr/st2-scout/commit/e018848787958f5cdc2b9dfb185f2dbbb69eb1a8))
+
+
+### Bug Fixes
+
+* use processed sample ids for scout case names (with fallbacks) ([#29](https://github.com/gmc-norr/st2-scout/issues/29)) ([c5dca7e](https://github.com/gmc-norr/st2-scout/commit/c5dca7efe5166374b746030ed3ca56c2768308c7))
+* yaql Get bug fix ([#38](https://github.com/gmc-norr/st2-scout/issues/38)) ([bb1cadf](https://github.com/gmc-norr/st2-scout/commit/bb1cadf6684f52cefffaa50ffd736c5a9f3a4bce))
+
 ## [2.1.2](https://github.com/gmc-norr/st2-scout/compare/v2.1.1...v2.1.2) (2026-09-07)
 
 
