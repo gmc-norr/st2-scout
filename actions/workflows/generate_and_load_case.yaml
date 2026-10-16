@@ -10,6 +10,7 @@ input:
   - analysis_id
   - secondary_analysis_id
   - output_path
+  - rerun
 
 output:
   - load_config_path: <% ctx().load_config_path %>
@@ -153,8 +154,8 @@ tasks:
     join: 4
     action: scout.generate_load_config
     input:
-      case_id: <% ctx().case_id %>
-      case_name: <% ctx().case_name %>
+      case_id: <% ctx().case_id + if(ctx().rerun != null, '_' + str(ctx().rerun), '') %>
+      case_name: <% ctx().case_name + if(ctx().rerun != null, '_' + str(ctx().rerun), '') %>
       sample_ids: <% ctx().sample_ids %>
       sample_files: <% ctx().sample_files %>
       sample_info: <% ctx().sample_info %>
@@ -197,9 +198,12 @@ tasks:
     input:
       load_config: <% ctx().load_config_path %>
     next:
-      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease"%>
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" and ctx().rerun = null %>
         do: 
           - get_loqusdb_files
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" and ctx().rerun = "CNV" %>
+        do: 
+          - load_samples_into_gens
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid"%>
         publish:
           - success_message: "Variants and case loaded successfully into scout for case <% ctx().case_id %>, using the <% ctx().pipeline %> pipeline"
@@ -239,13 +243,30 @@ tasks:
       config_file: <% ctx().loqusdb_config %>
     next:
       - when: <% succeeded() %>
+        do:
+          - load_samples_into_gens
+      - when: <% failed() %>
         publish:
-          - success_message: "Variants and case loaded successfully into scout and loqusdb for case <% ctx().case_id %>, using the <% ctx().pipeline %> pipeline"
+          - msg: <% result().values().first().stderr %>
+        do:
+          - report_failure
+
+  load_samples_into_gens:
+    with: sample_id in <% ctx().sample_ids %>
+    action: scout.load_sample_into_gens
+    input:
+      case_id: <% ctx().case_id + if(ctx().rerun != null, '_' + str(ctx().rerun), '') %>
+      sample_id: <% item(sample_id) %>
+      analysis_id: <% ctx().analysis_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - success_message: "case <% ctx().case_id %> loaded into scout, loqusdb, and gens, using the <% ctx().pipeline %> pipeline"
         do:
           - report_success
       - when: <% failed() %>
         publish:
-          - msg: <% result().values().first().stderr %>
+           - msg: "failed to load case <% ctx().case_id %> into gens"
         do:
           - report_failure
 

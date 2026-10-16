@@ -1,0 +1,22 @@
+---
+name: load_sample_into_gens
+pack: scout
+description: loads sample into gens
+runner_type: orquesta
+entry_point: workflows/load_sample_into_gens.yaml
+enabled: true
+
+parameters:
+  case_id:
+    description: wonderwords generated case-id for case
+    type: string
+    required: true
+  sample_id:
+    description: sample id
+    type: string
+    required: true
+  analysis_id:
+    description: cleve analysis-id
+    type: string
+    required: true
+    

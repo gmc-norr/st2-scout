@@ -128,6 +128,11 @@ class GenerateLoadConfigAction(Action):
         if len(default_panels) > 0:
             case_entry["default_gene_panels"] = default_panels
 
+        if "vcf_sv" in case_entry:
+            sv_rank_model_url = self.pipeline_specs["sv_rankmodel"]
+            case_entry["sv_rank_model_url"] = sv_rank_model_url
+            case_entry["sv_rank_model_version"] = '0.1'
+
         return case_entry
 
     def _sample_entries(self, sample_ids, sample_files: dict, sample_info: dict) -> list:
