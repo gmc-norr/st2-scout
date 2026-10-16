@@ -123,7 +123,7 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" %>
         publish:
           - igene_panels: <% result().first().result.body.Panels %>
-          - case_name: "<% result().first().result.body.get('ProcessedSampleID', result().first().result.body.SampleID) %>_<% result().first().result.body.ExternalRID %>"
+          - case_name: "<% result().first().result.body.get('ProcessedSampleID') or result().first().result.body.SampleID %>_<% result().first().result.body.ExternalRID %>"
           - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
       - when: <% failed() %>
