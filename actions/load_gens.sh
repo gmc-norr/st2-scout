@@ -5,6 +5,7 @@ set -euo pipefail
 BAF="$1"
 COV="$2"
 CASE_ID="$3"
+SEX="$4"
 
 
 if [[ -z "${BAF}" ]]; then
@@ -22,6 +23,11 @@ if [[ -z "${CASE_ID}" ]]; then
   exit 1
 fi
 
+if [[ -z "${SEX}" ]]; then
+  echo "Missing required parameter: sex" >&2
+  exit 1
+fi
+
 if [[ ! -f "${BAF}" ]]; then
   echo "baf file does not exist on remote host: ${BAF}" >&2
   exit 1
@@ -32,4 +38,4 @@ if [[ ! -f "${COV}" ]]; then
   exit 1
 fi
 
-docker compose exec gens gens load sample --baf "${BAF}" --coverage "${COV}" --case-id  "${CASE_ID}" 
+docker compose exec gens gens load sample --baf "${BAF}" --coverage "${COV}" --case-id  "${CASE_ID}" --sex "${SEX}" --sample-type proband --genome-build 38

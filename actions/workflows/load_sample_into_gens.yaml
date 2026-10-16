@@ -37,6 +37,7 @@ tasks:
         do:
           - get_gens_baf_file
 
+  
   get_gens_baf_file:
     action: cleve.get_analysis_files
     input:
@@ -61,6 +62,17 @@ tasks:
         publish:
           - gens_baf_file: <% result().result.body.first().path %>
         do:
+          - get_sample_sex
+
+  get_sample_sex:
+    action: igene.get_sample
+    input:
+      sample_id: <% ctx().sample_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - gens_sex: <% result().result.body.Sex %>
+        do:
           - load_gens
 
   load_gens:
@@ -69,3 +81,4 @@ tasks:
       baf_file: <% ctx().gens_baf_file %>
       cov_file: <% ctx().gens_cov_file %>
       case_id: <% ctx().case_id %>
+      sex: <% ctx().gens_sex %>

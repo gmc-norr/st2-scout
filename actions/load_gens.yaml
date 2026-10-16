@@ -41,3 +41,12 @@ parameters:
     description: "case_id of case, coresponding to case_id in scout"
     required: true
     position: 2
+
+  sex:
+    type: string
+    description: "Sex of individual"
+    required: true
+    enum: 
+      - M
+      - F
+    position: 3

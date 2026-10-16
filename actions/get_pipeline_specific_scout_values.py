@@ -10,7 +10,7 @@ PIPELINE_TO_SCOUT_SPECIFICS = {
         "owner": "clingen-rd",
         "genome": "38",
         "rankmodel": "https://raw.githubusercontent.com/gmc-norr/config-files/main/rankmodels/rare_disease_rank_model_0.1.ini",
-        "sv_rank_model_url": "https://raw.githubusercontent.com/gmc-norr/config-files/main/nextflow/nf-core/assets/raredisease/genmod/rare_disease_sv_rank_model_0.1.ini",
+        "sv_rankmodel": "https://raw.githubusercontent.com/gmc-norr/config-files/main/rankmodels/rare_disease_sv_rank_model_0.1.ini",
         "analysis_type": "wgs",
         "track": "rare",
         "global_panels": ("PANELAPP-GREEN", ),
