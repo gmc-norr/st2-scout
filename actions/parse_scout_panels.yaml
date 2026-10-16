@@ -1,0 +1,12 @@
+---
+name: parse_scout_panels
+description: "Parse Scout panel TSV output into structured panel objects"
+runner_type: python-script
+entry_point: parse_scout_panels.py
+enabled: true
+
+parameters:
+  panels_tsv:
+    type: string
+    description: "TSV output from scout view panels"
+    required: true
