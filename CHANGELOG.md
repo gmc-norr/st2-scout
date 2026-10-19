@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.2.0](https://github.com/gmc-norr/st2-scout/compare/v2.1.2...v2.2.0) (2026-10-16)
+
+
+### Features
+
+* add action `export_case` ([#35](https://github.com/gmc-norr/st2-scout/issues/35)) ([5d0dc0d](https://github.com/gmc-norr/st2-scout/commit/5d0dc0de0cbb8f0fc2481f22832f5fff60f8141d))
+* add action `view_case` ([#34](https://github.com/gmc-norr/st2-scout/issues/34)) ([e7df1e9](https://github.com/gmc-norr/st2-scout/commit/e7df1e97394ddac92fb127f43fb89b27f37aea26))
+* add action to load gene panel from iGene ([#27](https://github.com/gmc-norr/st2-scout/issues/27)) ([cf757da](https://github.com/gmc-norr/st2-scout/commit/cf757dabe1f26137062ff9f895a13b7aba6b6197))
+* compare panels ([#31](https://github.com/gmc-norr/st2-scout/issues/31)) ([e018848](https://github.com/gmc-norr/st2-scout/commit/e018848787958f5cdc2b9dfb185f2dbbb69eb1a8))
+
+
+### Bug Fixes
+
+* use processed sample ids for scout case names (with fallbacks) ([#29](https://github.com/gmc-norr/st2-scout/issues/29)) ([c5dca7e](https://github.com/gmc-norr/st2-scout/commit/c5dca7efe5166374b746030ed3ca56c2768308c7))
+* yaql Get bug fix ([#38](https://github.com/gmc-norr/st2-scout/issues/38)) ([bb1cadf](https://github.com/gmc-norr/st2-scout/commit/bb1cadf6684f52cefffaa50ffd736c5a9f3a4bce))
+
+## [2.1.2](https://github.com/gmc-norr/st2-scout/compare/v2.1.1...v2.1.2) (2026-09-07)
+
+
+### Bug Fixes
+
+* ignore VerifKonst_PAN_GMS560 panel ([#25](https://github.com/gmc-norr/st2-scout/issues/25)) ([47f0040](https://github.com/gmc-norr/st2-scout/commit/47f00400b930f9c22acf4481ba804ef3df32e6f2))
+
+## [2.1.1](https://github.com/gmc-norr/st2-scout/compare/v2.1.0...v2.1.1) (2026-09-07)
+
+
+### Bug Fixes
+
+* ignore SNV_konst_GMS560 panel ([#23](https://github.com/gmc-norr/st2-scout/issues/23)) ([2ea6ee4](https://github.com/gmc-norr/st2-scout/commit/2ea6ee48c53272839b3b30d3466a4a99cc0bb26d))
+* more failure checks in `generate and load case` workflow ([#22](https://github.com/gmc-norr/st2-scout/issues/22)) ([d15b018](https://github.com/gmc-norr/st2-scout/commit/d15b018808fa419e53bd478b825e70241ff42442))
+
 ## [2.1.0](https://github.com/gmc-norr/st2-scout/compare/v2.0.3...v2.1.0) (2026-08-27)
 
 

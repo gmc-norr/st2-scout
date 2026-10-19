@@ -55,6 +55,12 @@ tasks:
           - primary_case_files: <% result().result.body %>
         do: 
           - get_secondary_case_files
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get analysis files from Cleve.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   get_secondary_sample_files:
     with: sample_id in <% ctx().sample_ids %>
@@ -68,6 +74,12 @@ tasks:
         publish:
           - secondary_sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: concatenate_sample_files
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get analysis files from Cleve.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   concatenate_sample_files:
     action: core.noop
@@ -90,6 +102,12 @@ tasks:
           - case_files: <% ctx().primary_case_files + result().result.body %> # Append with previous case_files
         do: 
           - generate_load_config
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get analysis files from Cleve.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   get_sample_info:
     with: sample_id in <% ctx().sample_ids %>
@@ -100,15 +118,21 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - igene_panels: <% result().first().result.body.Panels %>
-          - case_name: <% result().first().result.body.ParentSampleID %>
+          - case_name: <% result().first().result.body.get(ProcessedSampleID) or result().first().result.body.ParentSampleID %>
           - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" %>
         publish:
           - igene_panels: <% result().first().result.body.Panels %>
-          - case_name: "<% ctx().sample_ids.first() %>_<% result().first().result.body.ExternalRID %>"
+          - case_name: "<% result().first().result.body.get(ProcessedSampleID) or result().first().result.body.SampleID %>_<% result().first().result.body.ExternalRID %>"
           - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
         do: generate_load_config
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get sample infor from the iGene API.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   get_scout_specifics:
     action: scout.get_pipeline_specific_scout_values
@@ -119,6 +143,12 @@ tasks:
         publish: 
           - scout_specifics: <% result().result %>
         do: generate_load_config
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get Scout specific values.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   generate_load_config:
     join: 4
@@ -138,6 +168,12 @@ tasks:
         publish:
           - load_config: <% result().result %>
         do: write_load_config
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to generate load config.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   write_load_config:
     action: scout.write_load_config
@@ -150,6 +186,12 @@ tasks:
         publish:
           - load_config_path: <% result().result.path %>
         do: load_case
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to write load config.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   load_case:
     action: scout.load_case
@@ -186,6 +228,12 @@ tasks:
           - loqusdb_vcf: <% result().result.loqusdb_vcf %>
           - loqusdb_ped: <% result().result.loqusdb_ped %>
         do: load_variants
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get loqusdb files.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   load_variants:
     action: scout.load_variants
