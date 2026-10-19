@@ -42,6 +42,12 @@ parameters:
     required: true
     position: 2
 
+  sample_id:
+    type: string
+    description: "sample_id if sample"
+    required: true
+    position: 3
+
   sex:
     type: string
     description: "Sex of individual"
@@ -49,4 +55,4 @@ parameters:
     enum: 
       - M
       - F
-    position: 3
+    position: 4

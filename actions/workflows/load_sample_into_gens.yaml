@@ -81,4 +81,5 @@ tasks:
       baf_file: <% ctx().gens_baf_file %>
       cov_file: <% ctx().gens_cov_file %>
       case_id: <% ctx().case_id %>
+      sample_id: <% ctx().sample_id %>
       sex: <% ctx().gens_sex %>
