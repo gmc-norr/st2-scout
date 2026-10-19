@@ -213,7 +213,7 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - success_message: "case <% ctx().case_id %> loaded into scout, loqusdb, and gens, using the <% ctx().pipeline %> pipeline"
+          - success_message: "case <% ctx().case_id %> successfully loaded into scout, loqusdb, and gens, using the <% ctx().pipeline %> pipeline"
         do:
           - report_success
       - when: <% failed() %>
