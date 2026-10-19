@@ -64,9 +64,6 @@ class GenerateLoadConfigAction(Action):
         if m is None:
             raise ValueError(f"unknown panel: {igene_panel}")
 
-        if m.group(3) not in ["WGS", "GMS560"]:
-            raise ValueError(f"Unknown panel {igene_panel}")
-
         return igene_panel
 
     def _case_entry(
