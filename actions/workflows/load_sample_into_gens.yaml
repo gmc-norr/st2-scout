@@ -83,3 +83,14 @@ tasks:
       case_id: <% ctx().case_id %>
       sample_id: <% ctx().sample_id %>
       sex: <% ctx().gens_sex %>
+
+
+  report_failure:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: "Failed to gens: <% ctx().case_id %> - <% ctx().sample_id %>"
+        message: <% ctx().msg %>
+    next:
+      - do: fail
