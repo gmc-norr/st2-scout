@@ -8,9 +8,6 @@ input:
   - sample_id
   - analysis_id
 
-output:
-  - load_config_path: <% ctx().load_config_path %>
-
 tasks:  
   
   get_gens_cov_file:
