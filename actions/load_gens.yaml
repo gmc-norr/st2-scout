@@ -1,0 +1,58 @@
+---
+name: load_gens
+description: "Load a case into gens"
+runner_type: remote-shell-script
+entry_point: load_gens.sh
+enabled: true
+
+parameters:
+  hosts:
+    type: string
+    description: "Remote host running the gens Docker container"
+    required: true
+    default: "{{ config_context.scout_host }}"
+
+  cwd:
+    type: string
+    description: "Path to directory with scout docker-compose"
+    required: true
+    default: "{{ config_context.scout_cwd }}"
+
+  timeout:
+    type: integer
+    description: "timeout for loading a case into scout"
+    required: true
+    default: 1800
+
+  baf_file:
+    type: string
+    description: "Path to bad.bed file on the remote host"
+    required: true
+    position: 0
+
+  cov_file:
+    type: string
+    description: "Path to cov.bed file on the remote host"
+    required: true
+    position: 1
+
+  case_id:
+    type: string
+    description: "case_id of case, coresponding to case_id in scout"
+    required: true
+    position: 2
+
+  sample_id:
+    type: string
+    description: "sample_id if sample"
+    required: true
+    position: 3
+
+  sex:
+    type: string
+    description: "Sex of individual"
+    required: true
+    enum: 
+      - M
+      - F
+    position: 4

@@ -31,4 +31,10 @@ parameters:
     description: output path for scout load config
     type: string
     required: true
+  rerun:
+    description: Specifies if sample is rerun, and what kind of rerun it is. 
+    type: string
+    required: false
+    enum:
+      - "CNV"
     
