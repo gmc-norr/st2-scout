@@ -154,7 +154,7 @@ tasks:
     join: 4
     action: scout.generate_load_config
     input:
-      case_id: <% ctx().case_id + switch(ctx().rerun != null => '_' + str(ctx().rerun), true => '') %>
+      case_id: <% ctx().case_id %>
       case_name: <% ctx().case_name + switch(ctx().rerun != null => '_' + str(ctx().rerun), true => '') %>
       sample_ids: <% ctx().sample_ids %>
       sample_files: <% ctx().sample_files %>
@@ -255,7 +255,7 @@ tasks:
     with: sample_id in <% ctx().sample_ids %>
     action: scout.load_sample_into_gens
     input:
-      case_id: <% ctx().case_id + switch(ctx().rerun != null => '_' + str(ctx().rerun), true => '') %>
+      case_id: <% ctx().case_id %>
       sample_id: <% item(sample_id) %>
       analysis_id: <% ctx().analysis_id %>
     next:
