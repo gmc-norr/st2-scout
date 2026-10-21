@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/gmc-norr/st2-scout/compare/v2.2.0...v2.3.0) (2026-10-21)
+
+
+### Features
+
+* use full igene panel name in scout ([#37](https://github.com/gmc-norr/st2-scout/issues/37)) ([7b26b9b](https://github.com/gmc-norr/st2-scout/commit/7b26b9b99d0502f34991ae95f10d769a70e04618))
+
 ## [2.2.0](https://github.com/gmc-norr/st2-scout/compare/v2.1.2...v2.2.0) (2026-10-16)
 
 
