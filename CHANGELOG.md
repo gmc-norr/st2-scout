@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/gmc-norr/st2-scout/compare/v2.3.0...v2.4.0) (2026-10-26)
+
+
+### Features
+
+* Add CNVs to scout and scout subservices ([#33](https://github.com/gmc-norr/st2-scout/issues/33)) ([9146138](https://github.com/gmc-norr/st2-scout/commit/9146138f7c307d547b02188c37dd9a0985acb4d0))
+
 ## [2.3.0](https://github.com/gmc-norr/st2-scout/compare/v2.2.0...v2.3.0) (2026-10-21)
 
 
