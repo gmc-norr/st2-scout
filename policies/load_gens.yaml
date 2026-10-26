@@ -1,0 +1,9 @@
+---
+name: load_gens.concurrency
+description: Limits the concurrent load into gens to one case at a time
+enabled: true
+resource_ref: scout.load_gens
+policy_type: action.concurrency
+parameters:
+  action: delay
+  threshold: 1
