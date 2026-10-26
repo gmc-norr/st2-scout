@@ -34,6 +34,7 @@ class ComparePanels(Action):
                 # Skip if not WGS or GMS560 panel
                 if ("_PAN_WGS_" not in igene_id
                     and "_PAN_GMS560_" not in igene_id
+                    and "_SP_WGS_" not in igene_id
                 ):
                     continue
 

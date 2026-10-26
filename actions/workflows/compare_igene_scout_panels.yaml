@@ -58,7 +58,8 @@ tasks:
       gene_panel_id: <% item(panel).panel_name %>
       institute: <% switch(
         '_PAN_GMS560_' in item(panel).panel_name => 'clingen-solid',
-        '_PAN_WGS_' in item(panel).panel_name => 'clingen-rd'
+        '_PAN_WGS_' in item(panel).panel_name => 'clingen-rd',
+        '_SP_WGS_' in item(panel).panel_name => 'clingen-rd'
         ) %>
 
 output:
