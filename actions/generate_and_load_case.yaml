@@ -16,7 +16,7 @@ parameters:
     type: array
     required: true
   pipeline:
-    description: name of analysis pipeline, e.g. nf-core/raredisease 
+    description: name of analysis pipeline, e.g. nf-core/raredisease
     type: string
     required: true
   analysis_id:
@@ -32,10 +32,9 @@ parameters:
     type: string
     required: true
   rerun:
-    description: Specifies if sample is rerun, and what kind of rerun it is. 
+    description: Specifies if sample is rerun, and what kind of rerun it is.
     type: string
     required: false
     enum:
       - "CNV"
-      - "None"
-    
+      - null
