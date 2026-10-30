@@ -12,13 +12,10 @@ input:
   - output_path
   - rerun
 
-vars:
-
 output:
   - load_config_path: <% ctx().load_config_path %>
 
 tasks:
-
   get_sample_files:
     with: sample_id in <% ctx().sample_ids %>
     action: cleve.get_analysis_files
