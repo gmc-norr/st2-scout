@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.2](https://github.com/gmc-norr/st2-scout/compare/v2.4.1...v2.4.2) (2026-10-30)
+
+
+### Bug Fixes
+
+* real null value as rerun input ([#44](https://github.com/gmc-norr/st2-scout/issues/44)) ([f62a243](https://github.com/gmc-norr/st2-scout/commit/f62a243d8793ab068fdda29540891eb01c78ebae))
+
 ## [2.4.1](https://github.com/gmc-norr/st2-scout/compare/v2.4.0...v2.4.1) (2026-10-30)
 
 
