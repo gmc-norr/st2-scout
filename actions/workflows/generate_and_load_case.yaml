@@ -12,6 +12,9 @@ input:
   - output_path
   - rerun
 
+vars:
+  rerun: <% switch(ctx().rerun = None => null, true => ctx().rerun) %>
+
 output:
   - load_config_path: <% ctx().load_config_path %>
 

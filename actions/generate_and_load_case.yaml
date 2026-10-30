@@ -37,4 +37,5 @@ parameters:
     required: false
     enum:
       - "CNV"
+      - "None"
     
