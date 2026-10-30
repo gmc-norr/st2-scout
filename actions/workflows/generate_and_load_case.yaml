@@ -13,7 +13,7 @@ input:
   - rerun
 
 vars:
-  - rerun: <% ctx().rerun %>
+  - rerun: <% switch(ctx().rerun = 'None' => null, true => ctx().rerun) %>
 
 output:
   - load_config_path: <% ctx().load_config_path %>
