@@ -1,7 +1,7 @@
 
 version: 1.0
 
-description: Build Scout load config for a case, and load into scout and loqusdb. 
+description: Build Scout load config for a case, and load into scout and loqusdb.
 
 input:
   - case_id
@@ -13,7 +13,6 @@ input:
   - rerun
 
 vars:
-  - rerun: <% switch(ctx().rerun = 'None' => null, true => ctx().rerun) %>
 
 output:
   - load_config_path: <% ctx().load_config_path %>
@@ -51,12 +50,12 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - case_files: <% result().result.body %>
-        do: 
+        do:
           - generate_load_config
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
         publish:
           - primary_case_files: <% result().result.body %>
-        do: 
+        do:
           - get_secondary_case_files
       - when: <% failed() %>
         publish:
@@ -72,7 +71,7 @@ tasks:
       analysis_id: <% ctx().secondary_analysis_id %>
       parent_id: <% item(sample_id) %>
       level: sample
-    next: 
+    next:
       - when: <% succeeded() %>
         publish:
           - secondary_sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
@@ -90,7 +89,7 @@ tasks:
       - when: <% succeeded() %>
         publish:
           - sample_files: <% dict(zip(ctx().sample_ids, ctx().sample_ids.select(ctx().primary_sample_files.get($) + ctx().secondary_sample_files.get($)))) %>
-        do: 
+        do:
           - generate_load_config
 
   get_secondary_case_files:
@@ -103,7 +102,7 @@ tasks:
       - when: <% succeeded() %>
         publish:
           - case_files: <% ctx().primary_case_files + result().result.body %> # Append with previous case_files
-        do: 
+        do:
           - generate_load_config
       - when: <% failed() %>
         publish:
@@ -143,7 +142,7 @@ tasks:
       pipeline: <% ctx().pipeline %>
     next:
       - when: <% succeeded() %>
-        publish: 
+        publish:
           - scout_specifics: <% result().result %>
         do: generate_load_config
       - when: <% failed() %>
@@ -202,10 +201,10 @@ tasks:
       load_config: <% ctx().load_config_path %>
     next:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" and ctx().rerun = null %>
-        do: 
+        do:
           - get_loqusdb_files
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" and ctx().rerun = "CNV" %>
-        do: 
+        do:
           - load_samples_into_gens
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid"%>
         publish:
