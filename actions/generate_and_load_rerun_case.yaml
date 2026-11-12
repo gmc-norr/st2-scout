@@ -11,8 +11,8 @@ parameters:
     description: wonderwords generated case-id for case
     type: string
     required: true
-  sample_ids:
-    description: array of sample ids in case
+  sample_id:
+    description: sample id in case
     type: array
     required: true
   pipeline:
