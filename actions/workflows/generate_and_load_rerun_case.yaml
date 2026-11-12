@@ -40,7 +40,7 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - sample_files:
-              <% ctx().sample_id %>: <% result().result.body + ctx().bam_file %>
+              <% ctx().sample_id %>: <% result().result.body + list(ctx().bam_file) %>
         do: get_case_files
       - when: <% failed() %>
         publish:
@@ -77,7 +77,7 @@ tasks:
           - igene_panels: <% result().result.body.Panels or [] %>
           - case_name: <% result().result.body.ParentSampleID %> #to match earlier runs
           - sample_info:
-              <% ctx().sample_id %>: <% result().result.body) %>
+              <% ctx().sample_id %>: <% result().result.body %>
         do: get_scout_specifics
       - when: <% failed() %>
         publish:
