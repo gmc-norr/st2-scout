@@ -75,7 +75,7 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - igene_panels: <% result().result.body.Panels or [] %>
-          - case_name: <% result().result.body.ParentSampleID %> #to match earlier runs
+          - case_name: <% result().result.body.ParentSampleID + '_' + str(ctx().rerun %> #to match earlier runs
           - sample_info:
               <% ctx().sample_id %>: <% result().result.body %>
         do: get_scout_specifics
@@ -106,7 +106,7 @@ tasks:
     action: scout.generate_load_config
     input:
       case_id: <% ctx().case_id %>
-      case_name: <% ctx().case_name + switch(ctx().rerun != null => '_' + str(ctx().rerun), true => '') %>
+      case_name: <% ctx().case_name %>
       sample_ids:
         - <% ctx().sample_id %>
       sample_files: <% ctx().sample_files %>
