@@ -15,6 +15,21 @@ output:
   - load_config_path: <% ctx().load_config_path %>
 
 tasks:
+  get_old_bam:
+    action: scout.export_case
+    input:
+      case_id: "{{ ctx().case_id.split('_' + ctx().rerun)[0] }}"
+    next:
+      - when: "{{ succeeded() }}"
+        publish:
+          - bam_file:
+              parent_id: <% ctx().sample_id %>
+              level: sample
+              type: bam
+              path: <% result().values().first().stdout.first().individuals.first().bam_file %> #please tell me this isn't based on what you called it in the load_config...
+        do:
+          get_sample_files
+
   get_sample_files:
     with: sample_id in <% ctx().sample_ids %>
     action: cleve.get_analysis_files
@@ -25,7 +40,7 @@ tasks:
     next:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
-          - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
+          - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body) + list(ctx().bam_file))) %>
         do: get_case_files
       - when: <% failed() %>
         publish:
