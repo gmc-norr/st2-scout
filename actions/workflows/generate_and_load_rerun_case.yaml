@@ -5,7 +5,7 @@ description: Build Scout load config for a rerun case, and load into scout and g
 
 input:
   - case_id
-  - sample_ids
+  - sample_id
   - pipeline
   - analysis_id
   - output_path
@@ -31,16 +31,16 @@ tasks:
           get_sample_files
 
   get_sample_files:
-    with: sample_id in <% ctx().sample_ids %>
     action: cleve.get_analysis_files
     input:
       analysis_id: <% ctx().analysis_id %>
-      parent_id: <% item(sample_id) %>
+      parent_id: <% ctx(sample_id) %>
       level: sample
     next:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
-          - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body) + list(ctx().bam_file))) %>
+          - sample_files:
+              <% ctx().sample_id %>: <% result().select($.result.body) + ctx().bam_file %>
         do: get_case_files
       - when: <% failed() %>
         publish:
@@ -68,17 +68,17 @@ tasks:
           - report_failure
 
   get_sample_info:
-    with: sample_id in <% ctx().sample_ids %>
     action: igene.get_sample
     input:
-      sample_id: <% item(sample_id) %>
+      sample_id: <% ctx(sample_id) %>
     next:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - igene_panels: <% result().first().result.body.Panels or [] %>
-          - case_name: <% result().first().result.body.get(ProcessedSampleID) or result().first().result.body.ParentSampleID %>
-          - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
-        do:   get_scout_specifics
+          - case_name: <% result().result.body.ParentSampleID %> #to match earlier runs
+          - sample_info:
+              <% ctx().sample_id %>: <% result().select($.result.body) %>
+        do: get_scout_specifics
       - when: <% failed() %>
         publish:
           - msg: "Failed to get sample infor from the iGene API.
@@ -103,12 +103,12 @@ tasks:
           - report_failure
 
   generate_load_config:
-    join: 4
     action: scout.generate_load_config
     input:
       case_id: <% ctx().case_id %>
       case_name: <% ctx().case_name + switch(ctx().rerun != null => '_' + str(ctx().rerun), true => '') %>
-      sample_ids: <% ctx().sample_ids %>
+      sample_ids:
+        - <% ctx().sample_id %>
       sample_files: <% ctx().sample_files %>
       sample_info: <% ctx().sample_info %>
       case_files: <% ctx().case_files %>
@@ -160,11 +160,10 @@ tasks:
           - report_failure
 
   load_samples_into_gens:
-    with: sample_id in <% ctx().sample_ids %>
     action: scout.load_sample_into_gens
     input:
       case_id: <% ctx().case_id %>
-      sample_id: <% item(sample_id) %>
+      sample_id: <% ctx(sample_id) %>
       analysis_id: <% ctx().analysis_id %>
     next:
       - when: <% succeeded() %>
@@ -183,7 +182,7 @@ tasks:
     input:
       trigger_name: gmc_norr_analysis.email_notification
       payload:
-        subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_ids %>"
+        subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_id %>"
         message: <% ctx().msg %>
     next:
       - do: fail
@@ -193,5 +192,5 @@ tasks:
     input:
       trigger_name: gmc_norr_analysis.email_notification
       payload:
-        subject: "Case <% ctx().case_id %> and samples <% ctx().sample_ids %> loaded to scout and loqusdb "
+        subject: "Case <% ctx().case_id %> and sample <% ctx().sample_id %> loaded to scout and loqusdb "
         message: <% ctx().success_message %>
