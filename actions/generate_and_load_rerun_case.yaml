@@ -13,7 +13,7 @@ parameters:
     required: true
   sample_id:
     description: sample id in case
-    type: array
+    type: string
     required: true
   pipeline:
     description: name of analysis pipeline, e.g. nf-core/raredisease
