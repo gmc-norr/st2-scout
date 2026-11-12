@@ -1,0 +1,182 @@
+
+version: 1.0
+
+description: Build Scout load config for a rerun case, and load into scout and gens.
+
+input:
+  - case_id
+  - sample_ids
+  - pipeline
+  - analysis_id
+  - output_path
+  - rerun
+
+output:
+  - load_config_path: <% ctx().load_config_path %>
+
+tasks:
+  get_sample_files:
+    with: sample_id in <% ctx().sample_ids %>
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().analysis_id %>
+      parent_id: <% item(sample_id) %>
+      level: sample
+    next:
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
+        publish:
+          - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
+        do: get_case_files
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get analysis files from Cleve
+              {{ result() | to_json_string }}"
+        do: report_failure
+
+  get_case_files:
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().analysis_id %>
+      level: case
+      parent_id: <% ctx().case_id %>
+    next:
+      - when: <% succeeded()  %>
+        publish:
+          - case_files: <% result().result.body %>
+        do:
+          - get_sample_info
+      - when: <% failed()  %>
+        publish:
+          - msg: "Failed to get analysis files from Cleve.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+
+  get_sample_info:
+    with: sample_id in <% ctx().sample_ids %>
+    action: igene.get_sample
+    input:
+      sample_id: <% item(sample_id) %>
+    next:
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
+        publish:
+          - igene_panels: <% result().first().result.body.Panels or [] %>
+          - case_name: <% result().first().result.body.get(ProcessedSampleID) or result().first().result.body.ParentSampleID %>
+          - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
+        do:   get_scout_specifics
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get sample infor from the iGene API.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+
+  get_scout_specifics:
+    action: scout.get_pipeline_specific_scout_values
+    input:
+      pipeline: <% ctx().pipeline %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - scout_specifics: <% result().result %>
+        do: generate_load_config
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get Scout specific values.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+
+  generate_load_config:
+    join: 4
+    action: scout.generate_load_config
+    input:
+      case_id: <% ctx().case_id %>
+      case_name: <% ctx().case_name + switch(ctx().rerun != null => '_' + str(ctx().rerun), true => '') %>
+      sample_ids: <% ctx().sample_ids %>
+      sample_files: <% ctx().sample_files %>
+      sample_info: <% ctx().sample_info %>
+      case_files: <% ctx().case_files %>
+      pipeline: <% ctx().pipeline %>
+      igene_panels: <% ctx().igene_panels %>
+      scout_specifics: <% ctx().scout_specifics %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - load_config: <% result().result %>
+        do: write_load_config
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to generate load config.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+
+  write_load_config:
+    action: scout.write_load_config
+    input:
+      load_config: <% ctx().load_config %>
+      output_path: "{{ctx().output_path}}/scout_load_config.yaml"
+      overwrite: true
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - load_config_path: <% result().result.path %>
+        do: load_case
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to write load config.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+
+  load_case:
+    action: scout.load_case
+    input:
+      load_config: <% ctx().load_config_path %>
+    next:
+      - when: <% succeeded() %>
+        do:
+          - load_samples_into_gens
+      - when: <% failed() %>
+        publish:
+          - msg: "{{ result() | to_json_string }}"
+        do:
+          - report_failure
+
+  load_samples_into_gens:
+    with: sample_id in <% ctx().sample_ids %>
+    action: scout.load_sample_into_gens
+    input:
+      case_id: <% ctx().case_id %>
+      sample_id: <% item(sample_id) %>
+      analysis_id: <% ctx().analysis_id %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - success_message: "case <% ctx().case_id %> successfully loaded into scout and gens, using the <% ctx().pipeline %> pipeline"
+        do:
+          - report_success
+      - when: <% failed() %>
+        publish:
+           - msg: "failed to load case <% ctx().case_id %> into gens"
+        do:
+          - report_failure
+
+  report_failure:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_ids %>"
+        message: <% ctx().msg %>
+    next:
+      - do: fail
+
+  report_success:
+    action: core.inject_trigger
+    input:
+      trigger_name: gmc_norr_analysis.email_notification
+      payload:
+        subject: "Case <% ctx().case_id %> and samples <% ctx().sample_ids %> loaded to scout and loqusdb "
+        message: <% ctx().success_message %>
