@@ -10,6 +10,7 @@ input:
   - analysis_id
   - output_path
   - rerun
+  - temp_path
 
 output:
   - load_config_path: <% ctx().load_config_path %>
