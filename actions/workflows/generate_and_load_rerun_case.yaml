@@ -26,7 +26,7 @@ tasks:
               parent_id: <% ctx().sample_id %>
               level: sample
               type: bam
-              path: <% result().values().first().stdout.first().individuals.first().bam_file %> #please tell me this isn't based on what you called it in the load_config...
+              path: <% result().values().first().stdout.first().individuals.first().bam_file %>
         do:
           get_sample_files
 
@@ -170,12 +170,21 @@ tasks:
         publish:
           - success_message: "case <% ctx().case_id %> successfully loaded into scout and gens, using the <% ctx().pipeline %> pipeline"
         do:
-          - report_success
+          - mark_success
       - when: <% failed() %>
         publish:
            - msg: "failed to load case <% ctx().case_id %> into gens"
         do:
           - report_failure
+
+  mark_success:
+    action: core.local
+    input:
+      cmd: touch <% ctx().temp_path %>/COMPLETE
+    next:
+      - when: <% succeeded() %>
+        do:
+          - report_success
 
   report_failure:
     action: core.inject_trigger
@@ -185,7 +194,8 @@ tasks:
         subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_id %>"
         message: <% ctx().msg %>
     next:
-      - do: fail
+      do:
+        - fail
 
   report_success:
     action: core.inject_trigger
