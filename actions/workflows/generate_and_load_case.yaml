@@ -16,6 +16,29 @@ output:
   - load_config_path: <% ctx().load_config_path %>
 
 tasks:
+  get_sample_info:
+    with: sample_id in <% ctx().sample_ids %>
+    action: igene.get_sample
+    input:
+      sample_id: <% item(sample_id) %>
+    next:
+      - when: "{{ succeeded() and result.first().result.body.TestProfile.endswith('utveckling') }}"
+        do: noop
+      - when: "{{ succeeded() and not result.first().result.body.TestProfile.endswith('utveckling') }}"
+        publish:
+          - igene_panels: <% result().first().result.body.Panels or [] %>
+          - case_name: <% switch(ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" =>
+              result().first().result.body.get(ProcessedSampleID) or result().first().result.body.SampleID + '_' + result().first().result.body.ExternalRID,
+              true => result().first().result.body.get(ProcessedSampleID) or result().first().result.body.ParentSampleID %>
+          - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
+        do: generate_load_config
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get sample info from the iGene API.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
+
   get_sample_files:
     with: sample_id in <% ctx().sample_ids %>
     action: cleve.get_analysis_files
@@ -104,31 +127,6 @@ tasks:
       - when: <% failed() %>
         publish:
           - msg: "Failed to get analysis files from Cleve.
-              {{ result() | to_json_string }}"
-        do:
-          - report_failure
-
-  get_sample_info:
-    with: sample_id in <% ctx().sample_ids %>
-    action: igene.get_sample
-    input:
-      sample_id: <% item(sample_id) %>
-    next:
-      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
-        publish:
-          - igene_panels: <% result().first().result.body.Panels or [] %>
-          - case_name: <% result().first().result.body.get(ProcessedSampleID) or result().first().result.body.ParentSampleID %>
-          - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
-        do: generate_load_config
-      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" %>
-        publish:
-          - igene_panels: <% result().first().result.body.Panels or [] %>
-          - case_name: "<% result().first().result.body.get(ProcessedSampleID) or result().first().result.body.SampleID %>_<% result().first().result.body.ExternalRID %>"
-          - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
-        do: generate_load_config
-      - when: <% failed() %>
-        publish:
-          - msg: "Failed to get sample infor from the iGene API.
               {{ result() | to_json_string }}"
         do:
           - report_failure
