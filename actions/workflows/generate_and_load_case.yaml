@@ -22,16 +22,16 @@ tasks:
     input:
       sample_id: <% item(sample_id) %>
     next:
-      - when: "{{ succeeded() and result.first().result.body.TestProfile.endswith('utveckling') }}"
+      - when: "{{ succeeded() and result()[0].result.body.TestProfile.endswith('utveckling') }}"
         do: noop
-      - when: "{{ succeeded() and not result.first().result.body.TestProfile.endswith('utveckling') }}"
+      - when: "{{ succeeded() and not result()[0].result.body.TestProfile.endswith('utveckling') }}"
         publish:
           - igene_panels: <% result().first().result.body.Panels or [] %>
           - case_name: <% switch(ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" =>
               result().first().result.body.get(ProcessedSampleID) or result().first().result.body.SampleID + '_' + result().first().result.body.ExternalRID,
-              true => result().first().result.body.get(ProcessedSampleID) or result().first().result.body.ParentSampleID %>
+              true => result().first().result.body.get(ProcessedSampleID) or result().first().result.body.ParentSampleID) %>
           - sample_info: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
-        do: generate_load_config
+        do: get_sample_files
       - when: <% failed() %>
         publish:
           - msg: "Failed to get sample info from the iGene API.
@@ -50,7 +50,7 @@ tasks:
       - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
         publish:
           - sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
-        do: generate_load_config
+        do: get_case_files
       - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
         publish:
           - primary_sample_files: <% dict(zip(ctx().sample_ids, result().select($.result.body))) %>
@@ -59,30 +59,6 @@ tasks:
         publish:
           - msg: "Case <% ctx().case_id %> and samples <% ctx().sample_ids %> have no secondary analysis"
         do: report_failure
-
-  get_case_files:
-    action: cleve.get_analysis_files
-    input:
-      analysis_id: <% ctx().analysis_id %>
-      level: case
-      parent_id: <% ctx().case_id %>
-    next:
-      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
-        publish:
-          - case_files: <% result().result.body %>
-        do:
-          - generate_load_config
-      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
-        publish:
-          - primary_case_files: <% result().result.body %>
-        do:
-          - get_secondary_case_files
-      - when: <% failed() %>
-        publish:
-          - msg: "Failed to get analysis files from Cleve.
-              {{ result() | to_json_string }}"
-        do:
-          - report_failure
 
   get_secondary_sample_files:
     with: sample_id in <% ctx().sample_ids %>
@@ -110,7 +86,31 @@ tasks:
         publish:
           - sample_files: <% dict(zip(ctx().sample_ids, ctx().sample_ids.select(ctx().primary_sample_files.get($) + ctx().secondary_sample_files.get($)))) %>
         do:
-          - generate_load_config
+          - get_case_files
+
+  get_case_files:
+    action: cleve.get_analysis_files
+    input:
+      analysis_id: <% ctx().analysis_id %>
+      level: case
+      parent_id: <% ctx().case_id %>
+    next:
+      - when: <% succeeded() and ctx().pipeline = "nf-core/raredisease" %>
+        publish:
+          - case_files: <% result().result.body %>
+        do:
+          - get_scout_specifics
+      - when: <% succeeded() and ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" and ctx().secondary_analysis_id != null %>
+        publish:
+          - primary_case_files: <% result().result.body %>
+        do:
+          - get_secondary_case_files
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to get analysis files from Cleve.
+              {{ result() | to_json_string }}"
+        do:
+          - report_failure
 
   get_secondary_case_files:
     action: cleve.get_analysis_files
@@ -123,7 +123,7 @@ tasks:
         publish:
           - case_files: <% ctx().primary_case_files + result().result.body %> # Append with previous case_files
         do:
-          - generate_load_config
+          - get_scout_specifics
       - when: <% failed() %>
         publish:
           - msg: "Failed to get analysis files from Cleve.
@@ -148,7 +148,6 @@ tasks:
           - report_failure
 
   generate_load_config:
-    join: 4
     action: scout.generate_load_config
     input:
       case_id: <% ctx().case_id %>
