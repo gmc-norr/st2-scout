@@ -12,6 +12,9 @@ input:
   - output_path
   - rerun
 
+vars:
+  - load_config_path:
+
 output:
   - load_config_path: <% ctx().load_config_path %>
 
