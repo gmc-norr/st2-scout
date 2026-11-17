@@ -195,8 +195,7 @@ tasks:
         subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_id %>"
         message: <% ctx().msg %>
     next:
-      do:
-        - fail
+      - do: fail
 
   report_success:
     action: core.inject_trigger
