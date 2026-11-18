@@ -192,7 +192,7 @@ tasks:
     input:
       trigger_name: gmc_norr_analysis.email_notification
       payload:
-        subject: "Failed to submit to scout or loqusdb: <% ctx().case_id %> - <% ctx().sample_id %>"
+        subject: "Failed to submit rerun to scout or gens: <% ctx().case_id %> - <% ctx().sample_id %>"
         message: <% ctx().msg %>
     next:
       - do: fail
@@ -202,5 +202,5 @@ tasks:
     input:
       trigger_name: gmc_norr_analysis.email_notification
       payload:
-        subject: "Case <% ctx().case_id %> and sample <% ctx().sample_id %> loaded to scout and loqusdb "
+        subject: "Rerun case <% ctx().case_id %> and sample <% ctx().sample_id %> loaded to scout and gens"
         message: <% ctx().success_message %>
