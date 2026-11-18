@@ -33,7 +33,6 @@ parameters:
     required: false
     enum:
       - "CNV"
-      - null
   temp_path:
     description: The dir where the rerun was done
     type: string
