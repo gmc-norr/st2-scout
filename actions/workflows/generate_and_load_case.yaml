@@ -25,9 +25,7 @@ tasks:
     input:
       sample_id: <% item(sample_id) %>
     next:
-      - when: "{{ succeeded() and result()[0].result.body.TestProfile.endswith('utveckling') }}"
-        do: noop
-      - when: "{{ succeeded() and not result()[0].result.body.TestProfile.endswith('utveckling') }}"
+      - when: "{{ succeeded() }}"
         publish:
           - igene_panels: <% result().first().result.body.Panels or [] %>
           - case_name: <% switch(ctx().pipeline = "genomic-medicine-sweden/Twist_Solid" =>
