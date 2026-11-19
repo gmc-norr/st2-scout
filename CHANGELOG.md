@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.5.0](https://github.com/gmc-norr/st2-scout/compare/v2.4.1...v2.5.0) (2026-11-19)
+
+
+### Features
+
+* add `generate and load` workflow for rerun cases ([#46](https://github.com/gmc-norr/st2-scout/issues/46)) ([898549b](https://github.com/gmc-norr/st2-scout/commit/898549b5d419cf9202b3c9dad57017293a3d6417))
+
+
+### Bug Fixes
+
+* real null value as rerun input ([#44](https://github.com/gmc-norr/st2-scout/issues/44)) ([f62a243](https://github.com/gmc-norr/st2-scout/commit/f62a243d8793ab068fdda29540891eb01c78ebae))
+
 ## [2.4.1](https://github.com/gmc-norr/st2-scout/compare/v2.4.0...v2.4.1) (2026-10-30)
 
 
