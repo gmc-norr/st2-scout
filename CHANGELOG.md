@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/gmc-norr/st2-scout/compare/v2.5.0...v2.6.0) (2026-11-27)
+
+
+### Features
+
+* don't run `generate and load case` workflow for development samples ([#48](https://github.com/gmc-norr/st2-scout/issues/48)) ([6410be2](https://github.com/gmc-norr/st2-scout/commit/6410be2a1dd0901c196a27b2b5f23a04323e3d88))
+
 ## [2.5.0](https://github.com/gmc-norr/st2-scout/compare/v2.4.1...v2.5.0) (2026-11-19)
 
 
